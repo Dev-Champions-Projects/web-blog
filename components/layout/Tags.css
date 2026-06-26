@@ -1,0 +1,24 @@
+.tags-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.tags-container::-webkit-scrollbar-track {
+  background: #202733;
+  border-radius: 30px;
+  display: none;
+}
+
+.tags-container::-webkit-scrollbar-thumb {
+  background: #30394b;
+  border-radius: 30px;
+  display: none;
+}
+
+.tags-container:hover::-webkit-scrollbar-thumb,
+.tags-container:hover::-webkit-scrollbar-track {
+  display: block;
+}
+
+.tags-container::-webkit-scrollbar-thumb:hover {
+  background: #404b61;
+}

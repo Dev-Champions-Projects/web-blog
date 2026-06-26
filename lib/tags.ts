@@ -1,0 +1,17 @@
+export const tags = [
+  "All",
+  "HTML",
+  "CSS",
+  "SCSS",
+  "TailwindCSS",
+  "JavaScript",
+  "React",
+  "Next.js",
+  "Remix",
+  "Svelt",
+  "PHP",
+  "Angular",
+  "Node.js",
+  "Redux",
+  "Express.js",
+];
