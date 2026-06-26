@@ -1,6 +1,5 @@
 "use client";
 
-import { MdNoteAlt } from "react-icons/md";
 import Container from "./Container";
 import ThemeToggle from "./ThemeToggle";
 import SearchInput from "./SearchInput";
