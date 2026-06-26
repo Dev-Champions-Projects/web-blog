@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import next from "next";
 import { Server } from "socket.io";
-import job from "./lib/cron"; // no .ts extension
+import job from "./lib/cron.js";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
