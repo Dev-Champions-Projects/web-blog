@@ -30,18 +30,20 @@ const ListBlogs = ({
   isUserProfile,
 }: ListBlogsProps) => {
   return (
-    <div className="flex flex-col max-w-[800px] m-auto justify-between min-h-[85vh] px-4 pt-2">
-      <section>
+    <div className="max-w-[1200px] m-auto min-h-[85vh] px-4 pt-2">
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {blogs.map((blog) => (
           <BlogCard key={blog.id} blog={blog} isUserProfile={isUserProfile} />
         ))}
       </section>
 
-      <Pagination
-        currentPage={currentPage}
-        hasMore={hasMore}
-        isUserProfile={isUserProfile}
-      />
+      <div className="mt-6">
+        <Pagination
+          currentPage={currentPage}
+          hasMore={hasMore}
+          isUserProfile={isUserProfile}
+        />
+      </div>
     </div>
   );
 };

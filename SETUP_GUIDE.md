@@ -1,8 +1,9 @@
-# WebDevBlogs Setup Guide - Next.js v15
+# CHAMPIONS logs Setup Guide - Next.js v15
 
 This guide will walk you through getting all required credentials and setting up your project.
 
 ## Prerequisites
+
 - Node.js 18+ installed
 - npm or yarn package manager
 - Git (for version control)
@@ -13,17 +14,19 @@ This guide will walk you through getting all required credentials and setting up
 ## Step 1: Database Setup (PostgreSQL)
 
 ### Option A: Local PostgreSQL
+
 1. **Install PostgreSQL** from https://www.postgresql.org/download/
 2. **Create a database**:
    ```bash
-   createdb webdevblogs_db
+   createdb CHAMPIONSlogs_db
    ```
 3. **Set DATABASE_URL**:
    ```
-   DATABASE_URL="postgresql://username:password@localhost:5432/webdevblogs_db"
+   DATABASE_URL="postgresql://username:password@localhost:5432/CHAMPIONSlogs_db"
    ```
 
 ### Option B: Neon (Recommended - Free Cloud Database)
+
 1. Go to https://neon.tech
 2. Sign up with GitHub or email
 3. Create a new project
@@ -31,6 +34,7 @@ This guide will walk you through getting all required credentials and setting up
 5. Set `DATABASE_URL` to this connection string
 
 ### Option C: Railway or Supabase
+
 - **Railway**: https://railway.app
 - **Supabase**: https://supabase.com (also includes PostgreSQL)
 
@@ -41,6 +45,7 @@ This guide will walk you through getting all required credentials and setting up
 ### A. Generate AUTH_SECRET
 
 Run this command in your terminal:
+
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
@@ -54,7 +59,7 @@ Copy the output and set it as `AUTH_SECRET` in your `.env.local`
 1. Go to https://github.com/settings/developers
 2. Click **"New OAuth App"**
 3. Fill in the form:
-   - **Application name**: WebDevBlogs
+   - **Application name**: CHAMPIOSBlogs
    - **Homepage URL**: `http://localhost:3000`
    - **Authorization callback URL**: `http://localhost:3000/api/auth/callback/github`
 4. Click "Register application"
@@ -122,11 +127,13 @@ Copy the output and set it as `AUTH_SECRET` in your `.env.local`
 ## Step 5: Project Configuration
 
 ### 1. Clone/Navigate to Project
+
 ```bash
-cd c:\Users\Champion\Documents\Jobs\webdevblogs
+cd c:\Users\Champion\Documents\Jobs\wchampionslogs
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 npm install
 # or
@@ -136,6 +143,7 @@ yarn install
 ### 3. Create `.env.local` File
 
 Copy `.env.example` to `.env.local`:
+
 ```bash
 cp .env.example .env.local
 ```
@@ -143,14 +151,17 @@ cp .env.example .env.local
 Or create it manually with all credentials you gathered above.
 
 ### 4. Set BASE_URL
+
 ```
 BASE_URL=http://localhost:3000
 ```
+
 (Change to your production URL when deploying)
 
 ### 5. Setup Database Schema
 
 Run Prisma migrations:
+
 ```bash
 npx prisma migrate dev
 # or
@@ -158,6 +169,7 @@ npm run db:push
 ```
 
 ### 6. Generate Prisma Client
+
 ```bash
 npx prisma generate
 ```
@@ -167,6 +179,7 @@ npx prisma generate
 ## Step 6: Running the Project
 
 ### Development Mode
+
 ```bash
 npm run dev
 # or
@@ -176,6 +189,7 @@ yarn dev
 The project will start at `http://localhost:3000`
 
 ### Build for Production
+
 ```bash
 npm run build
 npm start
@@ -190,12 +204,14 @@ npm start
 When deploying to services like Vercel, Render, or Railway:
 
 1. **Update OAuth Redirect URIs** (GitHub & Google):
+
    ```
    https://yourdomain.com/api/auth/callback/github
    https://yourdomain.com/api/auth/callback/google
    ```
 
 2. **Set Production URLs**:
+
    ```
    BASE_URL=https://yourdomain.com
    AUTH_TRUST_HOST=https://yourdomain.com
@@ -205,6 +221,7 @@ When deploying to services like Vercel, Render, or Railway:
 3. **Update DATABASE_URL** to production database
 
 ### Vercel Deployment
+
 1. Push code to GitHub
 2. Go to https://vercel.com
 3. Connect your GitHub repository
@@ -212,6 +229,7 @@ When deploying to services like Vercel, Render, or Railway:
 5. Deploy
 
 ### Render Deployment
+
 1. Go to https://render.com
 2. Create new "Web Service"
 3. Connect GitHub repository
@@ -223,26 +241,31 @@ When deploying to services like Vercel, Render, or Railway:
 ## Troubleshooting
 
 ### Port Already in Use
+
 ```bash
 # Kill process on port 3000
 npx kill-port 3000
 ```
 
 ### Database Connection Issues
+
 - Check `DATABASE_URL` is correct
 - Ensure database server is running
 - For cloud databases, whitelist your IP in security settings
 
 ### OAuth Errors
+
 - Verify redirect URIs match exactly (http vs https, trailing slashes)
 - Check Client IDs and Secrets are correct
 - Make sure APIs are enabled in respective dashboards
 
 ### Email Not Sending
+
 - Verify `RESEND_API_KEY` is correct
 - Check domain verification in Resend
 
 ### File Upload Issues
+
 - Verify EdgeStore keys are correct
 - Check API key permissions
 

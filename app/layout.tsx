@@ -7,19 +7,21 @@ import { ThemeProvider } from "next-themes";
 import { auth } from "@/auth";
 import { SessionProvider } from "next-auth/react";
 import { EdgeStoreProvider } from "@/lib/edgestore";
-import { Toaster } from 'react-hot-toast'
+import { Toaster } from "react-hot-toast";
 import { SocketContextProvider } from "@/context/SocketContext";
+import Footer from "@/components/layout/Footer";
 
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ['400', '700']
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "WebDevBlog",
-  description: "Your favourite web dev blogs!",
-  icons: { icon: '/logo.svg' }
+  title: "Champions Log",
+  description:
+    "A blog for both developers and designers, sharing insights, tutorials, and stories from the tech world.",
+  icons: { icon: "/logo.svg" },
 };
 
 export default async function RootLayout({
@@ -27,8 +29,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  const session = await auth()
+  const session = await auth();
 
   return (
     <EdgeStoreProvider>
@@ -36,23 +37,29 @@ export default async function RootLayout({
         <SocketContextProvider>
           <html lang="en" suppressHydrationWarning>
             <body
-              className={cn('antialiased flex flex-col min-h-screen px-2', poppins.variable)}
+              className={cn(
+                "antialiased flex flex-col min-h-screen px-2",
+                poppins.variable,
+              )}
             >
               <Toaster
                 position="bottom-center"
                 toastOptions={{
                   style: {
                     background: "rgb(51 65 85)",
-                    color: "#fff"
-                  }
+                    color: "#fff",
+                  },
                 }}
               />
-              <ThemeProvider attribute='class' defaultTheme="system" enableSystem disableTransitionOnChange>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
                 <NavBar />
-                <main className="flex-grow">
-                  {children}
-                </main>
-                <footer>...</footer>
+                <main className="flex-grow">{children}</main>
+                <Footer />
               </ThemeProvider>
             </body>
           </html>
