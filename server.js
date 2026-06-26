@@ -1,16 +1,16 @@
 import { createServer } from "node:http";
 import next from "next";
 import { Server } from "socket.io";
-
-import job from "./lib/cron.ts";
-
-if (!dev) {
-  job.start();
-}
+import job from "./lib/cron"; // no .ts extension
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const port = process.env.PORT || 3000;
+
+// Start cron job only in production
+if (!dev) {
+  job.start();
+}
 
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
@@ -32,13 +32,11 @@ app.prepare().then(() => {
           socketId: socket.id,
         });
       }
-
       console.log("Current Online Users:", Array.from(onlineUsers.entries()));
     });
 
     socket.on("onNotification", (recipientId) => {
       const recipient = onlineUsers.get(recipientId);
-
       if (recipient) {
         io.to(recipient.socketId).emit("getNotifications");
       } else {
