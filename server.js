@@ -2,6 +2,12 @@ import { createServer } from "node:http";
 import next from "next";
 import { Server } from "socket.io";
 
+import job from "./lib/cron.js";
+
+if (!dev) {
+  job.start();
+}
+
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const port = process.env.PORT || 3000;
