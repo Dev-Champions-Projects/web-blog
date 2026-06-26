@@ -70,7 +70,7 @@ const Footer = () => {
 
                 <div>
                   <h2 className="text-xl font-bold text-[#5A1C4B] dark:text-[#7fd2eb]">
-                    CHAMPS LOG
+                    CHAMPS PATH
                   </h2>
                   <p className="text-sm text-slate-600 dark:text-slate-400">
                     Digital Innovation Partner

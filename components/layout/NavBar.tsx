@@ -55,7 +55,7 @@ const NavBar = () => {
               className="h-10 w-10 object-contain hidden dark:block"
               priority
             />
-            <div className="font-bold text-xl">CHAMPS LOG</div>
+            <div className="font-bold text-xl">CHAMPS PATH</div>
           </div>
           {isFeedsPage && <SearchInput />}
           <div className="flex gap-5 sm:gap-8 items-center">
