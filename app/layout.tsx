@@ -18,10 +18,10 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Champions Log",
+  title: "Champions Path",
   description:
     "A blog for both developers and designers, sharing insights, tutorials, and stories from the tech world.",
-  icons: { icon: "/logo.svg" },
+  icons: { icon: "/favicon.jpg" },
 };
 
 export default async function RootLayout({
