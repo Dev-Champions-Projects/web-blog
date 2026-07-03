@@ -56,7 +56,7 @@ const LoginForm = () => {
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col max-w-[500px] m-auto mt-8 gap-2"
     >
-      <Heading title="Login to CHAMPIONS LOG" lg center />
+      <Heading title="Login to Tech Path" lg center />
       <FormField
         id="email"
         register={register}

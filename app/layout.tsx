@@ -18,7 +18,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Champions Path",
+  title: "Tech Path",
   description:
     "A blog for both developers and designers, sharing insights, tutorials, and stories from the tech world.",
   icons: { icon: "/favicon.jpg" },

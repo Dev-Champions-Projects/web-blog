@@ -18,7 +18,7 @@ const Hero = () => {
                   Weekly Digest
                 </span>
                 <p className="mt-3 text-xl font-semibold text-white sm:text-2xl">
-                  Every Tuesday at 9am
+                  Every Wednesday at 11am
                 </p>
               </div>
               <div className="text-right">
@@ -32,17 +32,17 @@ const Hero = () => {
             <div className="lg:col-span-3 space-y-6">
               <span className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.2em] text-[#5A1C4B] dark:text-[#7fd2eb]">
                 <span className="h-2.5 w-2.5 rounded-full bg-[#5A1C4B] dark:bg-[#409FB6]" />
-                Champions Path
+                Tech Path
               </span>
               <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
                 Stay ahead with the latest tech, web dev trends, and product
-                insights.
               </h1>
               <p className="max-w-3xl text-lg leading-8 text-slate-600 dark:text-slate-300">
-                Explore expert-written articles, tutorials, and
-                behind-the-scenes stories from Dev Champions IT. Whether you’re
-                building SaaS, scaling applications, or mastering frontend,
-                everything you need is here.
+                Champions Path brings together developers, AI enthusiasts, data
+                analysts, digital marketers, and creators. From coding tutorials
+                and product insights to SEO strategies and social media growth
+                hacks, explore expert-written articles and real-world stories
+                that help you stay ahead in the digital age.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <Link
@@ -55,7 +55,7 @@ const Hero = () => {
                   href="/blog/create"
                   className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-900 transition hover:border-[#409FB6] hover:text-[#409FB6] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-[#409FB6]"
                 >
-                  Share Your Story
+                  Share Your Expertise
                 </Link>
               </div>
             </div>
@@ -63,20 +63,22 @@ const Hero = () => {
             <div className="lg:col-span-2 space-y-6">
               <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-6 shadow-lg shadow-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-600 dark:text-slate-300">
-                  Why read Champions Path?
+                  Why Tech Path?
                 </p>
                 <ul className="mt-6 space-y-4 text-slate-700 dark:text-slate-300">
                   <li className="flex gap-3">
                     <span className="mt-1 h-2.5 w-2.5 rounded-full bg-[#5A1C4B] dark:bg-[#409FB6]" />
-                    In-depth guides for modern web and AI projects.
+                    Expert insights across web, AI, data, and digital growth.
                   </li>
                   <li className="flex gap-3">
                     <span className="mt-1 h-2.5 w-2.5 rounded-full bg-[#5A1C4B] dark:bg-[#409FB6]" />
-                    Curated workflows, code examples, and real build stories.
+                    Practical tutorials, workflows, and real-world success
+                    stories.
                   </li>
                   <li className="flex gap-3">
                     <span className="mt-1 h-2.5 w-2.5 rounded-full bg-[#5A1C4B] dark:bg-[#409FB6]" />
-                    Fresh updates for teams, founders, and solo developers.
+                    Fresh updates for developers, marketers, founders, and
+                    creators.
                   </li>
                 </ul>
               </div>

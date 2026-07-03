@@ -44,7 +44,7 @@ const PasswordEmailForm = () => {
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col max-w-[500px] m-auto mt-8 gap-2"
     >
-      <Heading title="Forgot your CHAMPIONS LOG password?" lg center />
+      <Heading title="Forgot your Tech Path password?" lg center />
       <FormField
         id="email"
         register={register}

@@ -28,7 +28,7 @@ const EmailVerificationClient = () => {
 
   return (
     <div className="border-2 rounded-md p-2 flex flex-col gap-2 items-center my-8 max-w-[400px] mx-auto">
-      <Heading title="CHAMPIONS LOG" center />
+      <Heading title="Tech Path" center />
       {pending && <div>Verifying Email....</div>}
       {success && <Alert message={success} success />}
       {error && <Alert message={error} error />}

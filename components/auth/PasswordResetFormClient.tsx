@@ -48,7 +48,7 @@ const PasswordResetFormClient = () => {
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col max-w-[500px] m-auto mt-8 gap-2"
     >
-      <Heading title="Enter your new CHAMPIONS LOG password?" lg center />
+      <Heading title="Enter your new Tech Path password?" lg center />
       <FormField
         id="password"
         register={register}

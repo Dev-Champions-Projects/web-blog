@@ -38,7 +38,7 @@ const RegisterForm = () => {
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col max-w-[500px] m-auto mt-8 gap-2"
     >
-      <Heading title="Create a CHAMPIONS LOG Account" lg center />
+      <Heading title="Create a Tech Path Account" lg center />
       <FormField
         id="name"
         register={register}
