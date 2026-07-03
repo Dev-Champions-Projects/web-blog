@@ -6,7 +6,6 @@ import SearchInput from "./SearchInput";
 import Notifications from "./Notifications";
 import UserButton from "./UserButton";
 import Link from "next/link";
-import Image from "next/image";
 
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
