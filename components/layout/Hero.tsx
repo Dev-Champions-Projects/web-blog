@@ -38,7 +38,7 @@ const Hero = () => {
                 Stay ahead with the latest tech, web dev trends, and product
               </h1>
               <p className="max-w-3xl text-lg leading-8 text-slate-600 dark:text-slate-300">
-                Champions Path brings together developers, AI enthusiasts, data
+                Tech Path brings together developers, AI enthusiasts, data
                 analysts, digital marketers, and creators. From coding tutorials
                 and product insights to SEO strategies and social media growth
                 hacks, explore expert-written articles and real-world stories
