@@ -100,6 +100,7 @@ const RelatedPosts = async ({ blog }: RelatedPostsProps) => {
                   fill
                   alt={related.title}
                   className="object-cover transition duration-300 group-hover:scale-105"
+                  unoptimized
                 />
               ) : (
                 <div className="flex h-full items-center justify-center text-sm text-slate-500 dark:text-slate-400">

@@ -34,16 +34,16 @@ const BlogCard = async ({
             </Link>
           )}
         </div>
-        <div className="my-2 flex justify-between gap-6">
-          <div className="flex flex-col justify-between w-full">
+        <div className="my-2 flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:gap-6">
+          <div className="flex w-full min-w-0 flex-col justify-between gap-3">
             <Link
               href={`/blog/details/${blog.id}`}
-              className="text-xl sm:text-2xl font-bold"
+              className="text-xl font-bold sm:text-2xl"
             >
               {blog.title}
             </Link>
             {!!blog.tags.length && (
-              <div className="flex items-center gap-4 flex-wrap my-2">
+              <div className="flex flex-wrap items-center gap-2 my-1">
                 {blog.tags.map((tag) => (
                   <Tag key={tag}>{tag}</Tag>
                 ))}
@@ -54,14 +54,16 @@ const BlogCard = async ({
 
           {blog.coverImage && (
             <Link
-              href={`/blog/${blog.id}`}
-              className="w-full max-w-[160px] h-[100px] relative overflow-hidden"
+              href={`/blog/details/${blog.id}`}
+              className="relative block h-[220px] w-full overflow-hidden rounded-md md:h-[110px] md:w-[180px] md:max-w-[180px] md:shrink-0"
             >
               <Image
                 src={blog.coverImage}
                 fill
                 alt={blog.title}
-                className="object-cover rounded-md"
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 180px"
+                unoptimized
               />
             </Link>
           )}
