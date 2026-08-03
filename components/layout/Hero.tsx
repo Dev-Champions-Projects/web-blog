@@ -87,44 +87,44 @@ const Hero = () => {
                 </ul>
               </div>
 
-              <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-6 shadow-lg shadow-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none">
-                <div className="flex items-center justify-between gap-4">
+              <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 sm:p-6 shadow-lg shadow-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <div>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                    <p className="text-lg font-semibold text-slate-900 sm:text-sm dark:text-white">
                       Trusted by developers
                     </p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-base text-slate-500 sm:text-sm dark:text-slate-400">
                       50,000+ readers every month
                     </p>
                   </div>
-                  <span className="inline-flex rounded-full bg-[#409FB6]/10 px-3 py-1 text-sm font-semibold text-[#409FB6]">
+                  <span className="inline-flex w-fit rounded-full bg-[#409FB6]/15 px-4 py-2 text-sm font-semibold text-[#409FB6] sm:px-3 sm:py-1">
                     Top-rated
                   </span>
                 </div>
-                <div className="mt-6 flex items-center gap-3">
+                <div className="mt-5 flex flex-col gap-4 sm:mt-6 sm:flex-row sm:items-center sm:gap-3">
                   <div className="flex -space-x-3">
                     <img
                       src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80"
                       alt="Subscriber"
-                      className="h-10 w-10 rounded-full border-2 border-white object-cover dark:border-slate-900"
+                      className="h-11 w-11 rounded-full border-2 border-white object-cover dark:border-slate-900 sm:h-10 sm:w-10"
                     />
                     <img
                       src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80"
                       alt="Subscriber"
-                      className="h-10 w-10 rounded-full border-2 border-white object-cover dark:border-slate-900"
+                      className="h-11 w-11 rounded-full border-2 border-white object-cover dark:border-slate-900 sm:h-10 sm:w-10"
                     />
                     <img
                       src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&auto=format&fit=crop&q=80"
                       alt="Subscriber"
-                      className="h-10 w-10 rounded-full border-2 border-white object-cover dark:border-slate-900"
+                      className="h-11 w-11 rounded-full border-2 border-white object-cover dark:border-slate-900 sm:h-10 sm:w-10"
                     />
                     <img
                       src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=80"
                       alt="Subscriber"
-                      className="h-10 w-10 rounded-full border-2 border-white object-cover dark:border-slate-900"
+                      className="h-11 w-11 rounded-full border-2 border-white object-cover dark:border-slate-900 sm:h-10 sm:w-10"
                     />
                   </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                  <p className="text-base text-slate-600 sm:text-sm dark:text-slate-300">
                     Loved by product, design, and engineering teams.
                   </p>
                 </div>
