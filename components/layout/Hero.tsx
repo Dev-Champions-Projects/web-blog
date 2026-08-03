@@ -12,18 +12,22 @@ const Hero = () => {
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent" />
-            <div className="absolute inset-x-6 bottom-6 flex flex-col gap-6 rounded-3xl bg-slate-950/70 p-6 shadow-xl shadow-slate-950/20 backdrop-blur sm:flex-row sm:items-end sm:justify-between">
+            <div className="absolute inset-x-6 bottom-6 flex flex-col gap-6 rounded-3xl bg-slate-100/55 p-6 text-slate-900 shadow-xl shadow-slate-950/20 backdrop-blur-md dark:bg-slate-950/70 dark:text-slate-100 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <span className="inline-flex items-center gap-2 rounded-full bg-[#409FB6]/10 px-3 py-1 text-sm font-semibold text-[#409FB6]">
+                <span className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold  text-[#5A1C4B] dark:text-[#409FB6]">
                   Weekly Digest
                 </span>
-                <p className="mt-3 text-xl font-semibold text-white sm:text-2xl">
+                <p className="mt-3 text-xl font-semibold text-slate-900 sm:text-2xl dark:text-slate-100">
                   Every Wednesday at 11am
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-4xl font-bold text-white">98%</p>
-                <p className="text-sm text-slate-200/80">Open Rate</p>
+                <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">
+                  98%
+                </p>
+                <p className="text-sm text-slate-700 dark:text-primary">
+                  Open Rate
+                </p>
               </div>
             </div>
           </div>
