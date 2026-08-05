@@ -11,30 +11,40 @@ import {
 } from "@/schemas/PasswordEmailSchema";
 
 export const passwordEmail = async (values: PasswordEmailSchemaType) => {
-  const validatedFields = PasswordEmailSchema.safeParse(values);
+  try {
+    const validatedFields = PasswordEmailSchema.safeParse(values);
 
-  if (!validatedFields.success) {
-    return { error: "Invalid Email!" };
+    if (!validatedFields.success) {
+      return { error: "Invalid Email!" };
+    }
+
+    const { email } = validatedFields.data;
+
+    const user = await getUserByEmail(email);
+
+    if (!user || !user.email) {
+      return { error: "User not found!" };
+    }
+
+    const passwordResetToken = await generatePasswordResetToken(email);
+
+    const { error } = await sendPasswordResetEmail(
+      passwordResetToken.email,
+      passwordResetToken.token
+    );
+
+    if (error) {
+      return {
+        error: "Something went wrong while sending password reset email!",
+      };
+    }
+
+    return { success: "Password reset link was sent to your email!" };
+  } catch (error) {
+    console.error("passwordEmail action failed:", error);
+
+    return {
+      error: "Something went wrong while sending the password reset email.",
+    };
   }
-
-  const { email } = validatedFields.data;
-
-  const user = await getUserByEmail(email);
-
-  if (!user || !user.email) {
-    return { error: "User not found!" };
-  }
-
-  const passwordResetToken = await generatePasswordResetToken(email);
-
-  const { error } = await sendPasswordResetEmail(
-    passwordResetToken.email,
-    passwordResetToken.token
-  );
-
-  if (error) {
-    return { error: "Something went wrong while sending passord reset email!" };
-  }
-
-  return { success: "Password reset link was sent to your email!" };
 };

@@ -27,8 +27,12 @@ const PasswordEmailForm = () => {
 
   const onSubmit: SubmitHandler<PasswordEmailSchemaType> = (data) => {
     setError("");
-    startTransition(() => {
-      passwordEmail(data).then((res) => {
+    setSuccess("");
+
+    startTransition(async () => {
+      try {
+        const res = await passwordEmail(data);
+
         if (res?.error) {
           setError(res.error);
         }
@@ -36,7 +40,9 @@ const PasswordEmailForm = () => {
         if (res?.success) {
           setSuccess(res.success);
         }
-      });
+      } catch {
+        setError("Something went wrong while sending the password reset email.");
+      }
     });
   };
   return (

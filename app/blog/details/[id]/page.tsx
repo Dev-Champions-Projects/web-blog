@@ -1,6 +1,6 @@
 import { getBlogById } from "@/actions/blogs/getblogbyid";
 import { auth } from "@/auth";
-import BlockNoteEditor from "@/components/blog/editor/BlockNoteEditor";
+import BlockNoteEditor from "@/components/blog/editor/BlockNoteEditorClient";
 import Reactions from "@/components/blog/Reactions";
 import UserSummary from "@/components/blog/UserSummary";
 import RelatedPosts from "@/components/blog/RelatedPosts";

@@ -86,12 +86,12 @@ const RelatedPosts = async ({ blog }: RelatedPostsProps) => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
         {relatedBlogs.map((related) => (
           <Link
             key={related.id}
             href={`/blog/details/${related.id}`}
-            className="group block overflow-hidden rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-slate-700 dark:bg-slate-900/80"
+            className="group block w-full max-w-[320px] overflow-hidden rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-slate-700 dark:bg-slate-900/80"
           >
             <div className="relative h-40 overflow-hidden rounded-3xl bg-slate-100 dark:bg-slate-800">
               {related.coverImage ? (

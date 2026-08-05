@@ -31,8 +31,12 @@ const PasswordResetFormClient = () => {
 
   const onSubmit: SubmitHandler<PasswordResetSchemaType> = (data) => {
     setError("");
-    startTransition(() => {
-      passwordReset(data, token).then((res) => {
+    setSuccess("");
+
+    startTransition(async () => {
+      try {
+        const res = await passwordReset(data, token);
+
         if (res?.error) {
           setError(res.error);
         }
@@ -40,7 +44,9 @@ const PasswordResetFormClient = () => {
         if (res?.success) {
           setSuccess(res.success);
         }
-      });
+      } catch {
+        setError("Something went wrong while updating your password.");
+      }
     });
   };
   return (
