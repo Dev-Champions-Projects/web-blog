@@ -34,7 +34,7 @@ const UserDashboardRecent = ({ posts }: UserDashboardRecentProps) => {
           <Link
             key={post.id}
             href={`/blog/details/${post.id}`}
-            className="block rounded-3xl border border-slate-200 bg-slate-50 p-4 transition duration-200 hover:border-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950/70 dark:hover:border-slate-600 dark:hover:bg-slate-900"
+            className="block w-full min-w-0 rounded-3xl border border-slate-200 bg-slate-50 p-4 transition duration-200 hover:border-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950/70 dark:hover:border-slate-600 dark:hover:bg-slate-900"
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
               <div className="min-w-0">
