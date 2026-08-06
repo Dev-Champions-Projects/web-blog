@@ -65,7 +65,7 @@ export const SocketContextProvider = ({ children }: { children: React.ReactNode 
         return () => {
             socket.off('connect', onConnect)
             socket.off('disconnect', onDisconnect)
-            socket.on('getNotifications', onNotification)
+            socket.off('getNotifications', onNotification)
         }
     }, [socket])
 

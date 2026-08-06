@@ -46,6 +46,15 @@ const UserButton = () => {
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <button
+            onClick={() => router.push("/dashboard")}
+            className="flex items-center gap-2"
+          >
+            <Shield size={18} /> Dashboard
+          </button>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>
+          <button
             onClick={() => router.push("/blog/create")}
             className="flex items-center gap-2"
           >

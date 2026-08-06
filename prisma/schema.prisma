@@ -17,6 +17,7 @@ model User {
   tags          String[]
   accounts      Account[]
   blogs Blog[]
+  blogViews BlogView[]
   claps Clap[]
   followers Follow[] @relation("UserAsFollowed") // those who follow this user
   followings Follow[] @relation("UserAsFollower") // those followed by this user
@@ -96,10 +97,12 @@ model Blog{
   content String
   coverImage String?
   isPublished Boolean @default(false)
+  views Int @default(0)
   createdAt DateTime @default(now())
   tags String[]
   claps Clap[]
   bookmarks Bookmark[]
+  blogViews BlogView[]
   comments Comment[]
   notifications Notification[]
 
@@ -176,6 +179,19 @@ model Notification {
 
   blog Blog? @relation( fields: [blogId], references: [id], onDelete: Cascade)
   comment Comment? @relation( fields: [commentId], references: [id], onDelete: Cascade)
+}
+
+model BlogView {
+  id String @id @default(cuid())
+  blogId String
+  userId String?
+  createdAt DateTime @default(now())
+
+  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([blogId])
+  @@index([userId])
 }
 
 enum NotificationType {

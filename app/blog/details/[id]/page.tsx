@@ -1,4 +1,4 @@
-import { getBlogById } from "@/actions/blogs/getblogbyid";
+import { getBlogById, incrementBlogViews } from "@/actions/blogs/getblogbyid";
 import { auth } from "@/auth";
 import BlockNoteEditor from "@/components/blog/editor/BlockNoteEditorClient";
 import Reactions from "@/components/blog/Reactions";
@@ -22,6 +22,7 @@ const BlogContent = async ({ params }: BlogContentProps) => {
 
   const { id } = await params;
 
+  await incrementBlogViews({ blogId: id });
   const res = await getBlogById({ blogId: id });
 
   if (!res.success)
@@ -58,12 +59,18 @@ const BlogContent = async ({ params }: BlogContentProps) => {
         <Reactions blog={blog} />
         <Separator />
       </div>
-      <h2 className="text-4xl font-bold">{blog.title}</h2>
+      <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight sm:leading-snug break-words">
+        {blog.title}
+      </h2>
       {!!blog.tags.length && (
         <div className="flex items-center gap-4 flex-wrap">
-          {blog.tags.map((tag) => (
-            <Tag key={tag}>{tag}</Tag>
-          ))}
+          {[...blog.tags]
+            .sort((a, b) =>
+              a.localeCompare(b, undefined, { sensitivity: "base" }),
+            )
+            .map((tag) => (
+              <Tag key={tag}>{tag}</Tag>
+            ))}
         </div>
       )}
       <div>

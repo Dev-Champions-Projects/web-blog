@@ -3,6 +3,23 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 
+export const incrementBlogViews = async ({ blogId }: { blogId: string }) => {
+  if (!blogId) return;
+
+  try {
+    await db.blog.update({
+      where: { id: blogId },
+      data: {
+        views: {
+          increment: 1,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Unable to increment blog views", error);
+  }
+};
+
 export const getBlogById = async ({ blogId }: { blogId: string }) => {
   if (!blogId) return { error: "No Blog ID" };
 

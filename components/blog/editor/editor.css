@@ -1,3 +1,31 @@
 .bn-container[data-color-scheme="dark"] {
   --bn-colors-editor-background: 222.2 84% 4.9%;
 }
+
+.bn-container h1,
+.bn-container h2,
+.bn-container h3,
+.bn-container h4,
+.bn-container h5,
+.bn-container h6 {
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.25;
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .bn-container h1 {
+    font-size: 1.5rem;
+  }
+
+  .bn-container h2 {
+    font-size: 1.25rem;
+  }
+
+  .bn-container h3 {
+    font-size: 1.125rem;
+  }
+}

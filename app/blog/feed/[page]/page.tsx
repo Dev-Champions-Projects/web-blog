@@ -6,8 +6,8 @@ import Hero from "@/components/layout/Hero";
 interface BlogFeedProps {
   params: Promise<{ page: string }>;
   searchParams: Promise<{
-    tag: string;
-    title: string;
+    tag?: string;
+    title?: string;
   }>;
 }
 

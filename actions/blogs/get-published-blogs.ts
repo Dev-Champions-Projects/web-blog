@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import type { Prisma } from "@prisma/client";
 
 export const getPublishedBlogs = async ({
   page = 1,
@@ -10,27 +11,35 @@ export const getPublishedBlogs = async ({
 }: {
   page: number;
   limit: number;
-  searchObj: { tag: string; title: string };
+  searchObj?: { tag?: string; title?: string };
 }) => {
   const skip = (page - 1) * limit;
-  const { tag, title } = searchObj;
+  const { tag, title } = searchObj ?? {};
 
   const session = await auth();
   const userId = session?.user.userId;
+
+  const where: Prisma.BlogWhereInput = {
+    isPublished: true,
+  };
+
+  if (title) {
+    where.title = {
+      contains: title,
+      mode: "insensitive",
+    };
+  }
+
+  if (tag) {
+    where.tags = { has: tag };
+  }
 
   try {
     const blogs = await db.blog.findMany({
       skip,
       take: limit,
       orderBy: { createdAt: "desc" },
-      where: {
-        title: {
-          contains: title,
-          mode: "insensitive",
-        },
-        isPublished: true,
-        ...(tag ? { tags: { has: tag } } : {}),
-      },
+      where,
       include: {
         user: {
           select: {
@@ -46,17 +55,13 @@ export const getPublishedBlogs = async ({
           },
         },
         claps: {
-          where: {
-            userId,
-          },
+          where: userId ? { userId } : undefined,
           select: {
             id: true,
           },
         },
         bookmarks: {
-          where: {
-            userId,
-          },
+          where: userId ? { userId } : undefined,
           select: {
             id: true,
           },
@@ -65,20 +70,14 @@ export const getPublishedBlogs = async ({
     });
 
     const totalBlogsCount = await db.blog.count({
-      where: {
-        title: {
-          contains: title,
-          mode: "insensitive",
-        },
-        isPublished: true,
-        ...(tag ? { tags: { has: tag } } : {}),
-      },
+      where,
     });
 
     const hasMore = totalBlogsCount > page * limit;
 
     return { success: { blogs, hasMore } };
   } catch (error) {
+    console.error("getPublishedBlogs error", error);
     return { error: "Error fetching blogs!" };
   }
 };
