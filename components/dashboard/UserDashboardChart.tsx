@@ -24,8 +24,8 @@ const UserDashboardChart = ({
   const maxCount = Math.max(...weeklyViews.map((item) => item.count), 1);
 
   return (
-    <div className="w-full min-w-0">
-      <div className="w-full min-w-0 flex flex-col gap-6 rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+    <div className="w-full max-w-full min-w-0">
+      <div className="w-full max-w-full min-w-0 flex flex-col gap-6 rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
         <div className="flex items-center justify-between gap-3 mb-6">
           <div>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -79,7 +79,7 @@ const UserDashboardChart = ({
                   key={post.id}
                   className="flex min-w-0 items-center justify-between gap-3 rounded-3xl bg-white p-3 shadow-sm dark:bg-slate-900"
                 >
-                  <span className="min-w-0 truncate font-medium text-slate-900 dark:text-slate-100">
+                  <span className="min-w-0 max-w-full truncate font-medium text-slate-900 dark:text-slate-100">
                     {post.title}
                   </span>
                   <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
