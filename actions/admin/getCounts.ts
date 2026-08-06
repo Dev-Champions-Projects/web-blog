@@ -16,11 +16,13 @@ export const getCounts = async () => {
     const totalClaps = await db.clap.count();
     const totalComments = await db.comment.count();
     const totalBookmarks = await db.bookmark.count();
-    const viewAggregate = await db.blog.aggregate({
-      _sum: {
+    const blogs = await db.blog.findMany({
+      select: {
         views: true,
       },
     });
+
+    const totalViews = blogs.reduce((sum, blog) => sum + blog.views, 0);
 
     return {
       success: {
@@ -29,7 +31,7 @@ export const getCounts = async () => {
         totalClaps,
         totalComments,
         totalBookmarks,
-        totalViews: viewAggregate._sum?.views ?? 0,
+        totalViews,
       },
     };
   } catch (error) {
