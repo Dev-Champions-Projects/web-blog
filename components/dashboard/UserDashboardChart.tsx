@@ -24,8 +24,8 @@ const UserDashboardChart = ({
   const maxCount = Math.max(...weeklyViews.map((item) => item.count), 1);
 
   return (
-    <div className="overflow-x-auto pb-2">
-      <div className="inline-flex min-w-[320px] sm:min-w-0 max-w-full flex-col gap-6 rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+    <div className="overflow-x-auto pb-2 w-full">
+      <div className="w-full sm:max-w-full flex flex-col gap-6 rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
         <div className="flex items-center justify-between gap-3 mb-6">
           <div>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">

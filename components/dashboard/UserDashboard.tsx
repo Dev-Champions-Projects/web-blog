@@ -79,13 +79,13 @@ const UserDashboard = ({
       />
       <div className="grid gap-4 xl:grid-cols-[1.4fr_0.95fr]">
         <UserDashboardRecent posts={recentPosts} />
-        <div className="overflow-x-auto pb-2">
-          <div className="max-w-full flex flex-col gap-4">
+        <div className="overflow-x-auto pb-2 w-full">
+          <div className="w-full flex flex-col gap-4">
             <UserDashboardChart
               weeklyViews={weeklyViews}
               topPosts={topViewedPosts}
             />
-            <div className="max-w-full rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+            <div className="w-full rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
                 Reader engagement summary
               </p>
