@@ -46,10 +46,16 @@ const UserDashboardRecent = ({ posts }: UserDashboardRecentProps) => {
                 </p>
               </div>
               <div className="flex flex-wrap gap-3 text-sm text-slate-600 dark:text-slate-400">
-                <span>{post._count.claps} claps</span>
-                <span>{post._count.comments} comments</span>
-                <span>{post._count.bookmarks} saves</span>
-                <span>{post.views} views</span>
+                <span className="min-w-0 truncate">
+                  {post._count.claps} claps
+                </span>
+                <span className="min-w-0 truncate">
+                  {post._count.comments} comments
+                </span>
+                <span className="min-w-0 truncate">
+                  {post._count.bookmarks} saves
+                </span>
+                <span className="min-w-0 truncate">{post.views} views</span>
               </div>
             </div>
           </Link>
