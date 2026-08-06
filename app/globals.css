@@ -65,6 +65,14 @@
   }
 }
 
+@layer base {
+  html,
+  body,
+  #__next {
+    @apply overflow-x-hidden;
+  }
+}
+
 /* Marquee container */
 .animate-marquee {
   display: inline-flex;
