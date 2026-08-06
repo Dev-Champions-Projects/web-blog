@@ -76,7 +76,7 @@
 body,
 .thin-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: hsl(var(--primary) / 0.75) hsl(var(--muted) / 0.18);
+  scrollbar-color: hsl(var(--primary) / 0.85) hsl(var(--muted) / 0.14);
 }
 
 body::-webkit-scrollbar,
@@ -88,20 +88,28 @@ body::-webkit-scrollbar,
 body::-webkit-scrollbar-track,
 .thin-scrollbar::-webkit-scrollbar-track {
   background: hsl(var(--muted) / 0.14);
-  border-radius: 999px;
+  border-radius: 9999px;
 }
 
 body::-webkit-scrollbar-thumb,
 .thin-scrollbar::-webkit-scrollbar-thumb {
-  background: hsl(var(--primary) / 0.72);
-  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    hsla(var(--primary), 0.96) 0%,
+    hsla(var(--primary-foreground), 0.88) 100%
+  );
+  border-radius: 9999px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
 
 body::-webkit-scrollbar-thumb:hover,
 .thin-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary) / 0.88);
+  background: linear-gradient(
+    180deg,
+    hsla(var(--primary), 1) 0%,
+    hsla(var(--primary-foreground), 1) 100%
+  );
 }
 
 /* Marquee container */

@@ -155,7 +155,7 @@ const AdminDashboardClient = ({ counts }: AdminDashboardClientProps) => {
       setHeading(json.success.heading ?? "Details");
       setDescription(json.success.description ?? "");
       setRows(Array.isArray(json.success.rows) ? json.success.rows : []);
-    } catch (fetchError) {
+    } catch {
       setError("Unable to load admin details. Please try again.");
     } finally {
       setLoading(false);
@@ -187,7 +187,7 @@ const AdminDashboardClient = ({ counts }: AdminDashboardClientProps) => {
         ...current,
         userCount: Math.max(current.userCount - 1, 0),
       }));
-    } catch (deleteError) {
+    } catch {
       setError("Unable to delete user. Please try again.");
     } finally {
       setDeletingUserId("");
