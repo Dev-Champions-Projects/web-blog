@@ -8,7 +8,6 @@ import UserButton from "./UserButton";
 import Link from "next/link";
 
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Tags from "./Tags";
 
@@ -20,16 +19,6 @@ const NavBar = () => {
 
   const isFeedsPage = path.includes("/blog/feed");
 
-  useEffect(() => {
-    if (!isLoggedIn && path) {
-      const updateSession = async () => {
-        await session.update();
-      };
-
-      updateSession();
-    }
-  }, [path, isLoggedIn]);
-
   return (
     <nav className="sticky top-0 border-b z-50  bg-white dark:bg-slate-950">
       <Container>
@@ -38,22 +27,6 @@ const NavBar = () => {
             className="flex items-center gap-1 cursor-pointer"
             onClick={() => router.push("/blog/feed/1")}
           >
-            {/* <Image
-              src="/logo_white.png"
-              alt="Tek Core Logo"
-              width={40}
-              height={40}
-              className="h-10 w-10 object-contain block dark:hidden"
-              priority
-            />
-            <Image
-              src="/logo_web_white.png"
-              alt="Tek Core Logo"
-              width={40}
-              height={40}
-              className="h-10 w-10 object-contain hidden dark:block"
-              priority
-            /> */}
             <div className="font-bold text-xl">TECH PATH</div>
           </div>
           {isFeedsPage && <SearchInput />}

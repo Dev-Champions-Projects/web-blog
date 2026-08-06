@@ -32,16 +32,20 @@ export default async function RootLayout({
   const session = await auth();
 
   return (
-    <EdgeStoreProvider>
-      <SessionProvider session={session}>
-        <SocketContextProvider>
-          <html lang="en" suppressHydrationWarning>
-            <body
-              className={cn(
-                "antialiased flex flex-col min-h-screen px-2",
-                poppins.variable,
-              )}
-            >
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={cn(
+          "antialiased flex flex-col min-h-screen px-2",
+          poppins.variable,
+        )}
+      >
+        <EdgeStoreProvider>
+          <SessionProvider
+            session={session}
+            refetchInterval={0}
+            refetchOnWindowFocus={false}
+          >
+            <SocketContextProvider>
               <Toaster
                 position="bottom-center"
                 toastOptions={{
@@ -61,10 +65,10 @@ export default async function RootLayout({
                 <main className="flex-grow">{children}</main>
                 <Footer />
               </ThemeProvider>
-            </body>
-          </html>
-        </SocketContextProvider>
-      </SessionProvider>
-    </EdgeStoreProvider>
+            </SocketContextProvider>
+          </SessionProvider>
+        </EdgeStoreProvider>
+      </body>
+    </html>
   );
 }

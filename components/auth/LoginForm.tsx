@@ -7,10 +7,11 @@ import FormField from "../common/FormField";
 import Button from "../common/Button";
 import Heading from "../common/Heading";
 import SocialAuth from "./SocialAuth";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { login } from "@/actions/auth/login";
 import Alert from "../common/Alert";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useSession, signIn } from "next-auth/react";
 import { LOGIN_REDIRECT } from "@/routes";
 import Link from "next/link";
 
@@ -25,29 +26,49 @@ const LoginForm = () => {
     formState: { errors },
   } = useForm<LoginSchemaType>({ resolver: zodResolver(LoginSchema) });
   const router = useRouter();
+  const session = useSession();
 
   const urlError =
     searchParams.get("error") === "OAuthAccountNotLinked"
       ? "Email in use with a different provider!"
       : "";
 
+  useEffect(() => {
+    if (session.status === "authenticated") {
+      router.push(LOGIN_REDIRECT);
+    }
+  }, [session.status, router]);
+
   const onSubmit: SubmitHandler<LoginSchemaType> = (data) => {
     setError("");
-    startTransition(() => {
-      login(data).then((res) => {
-        if (res?.error) {
-          router.replace("/login");
-          setError(res.error);
-        }
+    setSuccess("");
 
-        if (!res?.error) {
-          router.push(LOGIN_REDIRECT);
-        }
+    startTransition(async () => {
+      const res = await login(data);
 
-        if (res?.success) {
-          setSuccess(res.success);
-        }
+      if (res?.error) {
+        setError(res.error);
+        return;
+      }
+
+      if (res?.success) {
+        setSuccess(res.success);
+        return;
+      }
+
+      const signInResult = await signIn("credentials", {
+        redirect: false,
+        email: data.email,
+        password: data.password,
+        callbackUrl: LOGIN_REDIRECT,
       });
+
+      if (signInResult?.error) {
+        setError(signInResult.error);
+        return;
+      }
+
+      router.push(LOGIN_REDIRECT);
     });
   };
 

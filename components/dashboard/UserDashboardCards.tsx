@@ -57,7 +57,6 @@ const UserDashboardCards = ({
   totalComments,
   totalViews,
   totalReaders,
-  streak,
   readerStreak,
 }: UserDashboardCardsProps) => {
   return (

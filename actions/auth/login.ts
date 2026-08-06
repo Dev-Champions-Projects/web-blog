@@ -46,11 +46,7 @@ export const login = async (values: LoginSchemaType) => {
   }
 
   try {
-    await signIn("credentials", {
-      email,
-      password,
-      redirectTo: LOGIN_REDIRECT,
-    });
+    return { ok: true };
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -60,5 +56,7 @@ export const login = async (values: LoginSchemaType) => {
           return { error: "Something went wrong!" };
       }
     }
+
+    return { error: "Something went wrong!" };
   }
 };
