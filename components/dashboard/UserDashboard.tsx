@@ -77,7 +77,7 @@ const UserDashboard = ({
         streak={streak}
         readerStreak={readerStreak}
       />
-      <div className="grid gap-4 xl:grid-cols-[1.4fr_0.95fr]">
+      <div className="grid gap-4 lg:grid-cols-[1.4fr_0.95fr]">
         <UserDashboardRecent posts={recentPosts} />
         <div className="w-full min-w-0 flex flex-col gap-4">
           <div className="w-full min-w-0 overflow-x-auto pb-2">

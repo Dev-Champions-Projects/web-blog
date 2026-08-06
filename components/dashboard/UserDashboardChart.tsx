@@ -77,9 +77,9 @@ const UserDashboardChart = ({
               {topPosts.slice(0, 3).map((post) => (
                 <div
                   key={post.id}
-                  className="flex items-center justify-between gap-3 rounded-3xl bg-white p-3 shadow-sm dark:bg-slate-900"
+                  className="flex min-w-0 items-center justify-between gap-3 rounded-3xl bg-white p-3 shadow-sm dark:bg-slate-900"
                 >
-                  <span className="truncate font-medium text-slate-900 dark:text-slate-100">
+                  <span className="min-w-0 truncate font-medium text-slate-900 dark:text-slate-100">
                     {post.title}
                   </span>
                   <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
