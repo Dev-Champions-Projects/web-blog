@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const Hero = () => {
@@ -6,10 +7,12 @@ const Hero = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-12">
           <div className="relative w-full h-72 sm:h-96 rounded-[2rem] overflow-hidden shadow-2xl shadow-slate-900/10">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&auto=format&fit=crop&q=80"
               alt="Team working together"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              unoptimized
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent" />
             <div className="absolute inset-x-3 bottom-3 flex flex-col gap-4 rounded-2xl bg-slate-100/55 p-4 text-slate-900 shadow-xl shadow-slate-950/20 backdrop-blur-md dark:bg-slate-950/70 dark:text-slate-100 sm:inset-x-6 sm:bottom-6 sm:gap-6 sm:rounded-3xl sm:p-6 sm:flex-row sm:items-end sm:justify-between">
@@ -103,25 +106,37 @@ const Hero = () => {
                 </div>
                 <div className="mt-5 flex flex-col gap-4 sm:mt-6 sm:flex-row sm:items-center sm:gap-3">
                   <div className="flex -space-x-3">
-                    <img
+                    <Image
                       src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80"
                       alt="Subscriber"
+                      width={40}
+                      height={40}
                       className="h-11 w-11 rounded-full border-2 border-white object-cover dark:border-slate-900 sm:h-10 sm:w-10"
+                      unoptimized
                     />
-                    <img
+                    <Image
                       src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80"
                       alt="Subscriber"
+                      width={40}
+                      height={40}
                       className="h-11 w-11 rounded-full border-2 border-white object-cover dark:border-slate-900 sm:h-10 sm:w-10"
+                      unoptimized
                     />
-                    <img
+                    <Image
                       src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&auto=format&fit=crop&q=80"
                       alt="Subscriber"
+                      width={40}
+                      height={40}
                       className="h-11 w-11 rounded-full border-2 border-white object-cover dark:border-slate-900 sm:h-10 sm:w-10"
+                      unoptimized
                     />
-                    <img
+                    <Image
                       src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=80"
                       alt="Subscriber"
+                      width={40}
+                      height={40}
                       className="h-11 w-11 rounded-full border-2 border-white object-cover dark:border-slate-900 sm:h-10 sm:w-10"
+                      unoptimized
                     />
                   </div>
                   <p className="text-base text-slate-600 sm:text-sm dark:text-slate-300">
