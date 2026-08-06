@@ -16,8 +16,12 @@ export const getCounts = async () => {
     const totalClaps = await db.clap.count();
     const totalComments = await db.comment.count();
     const totalBookmarks = await db.bookmark.count();
-    const blogs = await db.blog.findMany();
-    const totalViews = blogs.reduce((sum, blog) => sum + blog.views, 0);
+    const viewRows = await db.blog.findMany({
+      select: {
+        views: true,
+      },
+    });
+    const totalViews = viewRows.reduce((sum, row) => sum + row.views, 0);
 
     return {
       success: {
