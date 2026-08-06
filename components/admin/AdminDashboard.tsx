@@ -1,14 +1,7 @@
 import { getCounts } from "@/actions/admin/getCounts";
 import Heading from "../common/Heading";
 import Alert from "../common/Alert";
-import {
-  BarChart3,
-  Users,
-  FileText,
-  Heart,
-  MessageCircle,
-  Bookmark,
-} from "lucide-react";
+import AdminDashboardClient from "./AdminDashboardClient";
 
 const AdminDashboard = async () => {
   const res = await getCounts();
@@ -24,39 +17,6 @@ const AdminDashboard = async () => {
     totalBookmarks = 0,
   } = res.success ?? {};
 
-  const stats = [
-    {
-      title: "Total users",
-      value: userCount,
-      icon: Users,
-    },
-    {
-      title: "Published posts",
-      value: blogCount,
-      icon: FileText,
-    },
-    {
-      title: "Total views",
-      value: totalViews,
-      icon: BarChart3,
-    },
-    {
-      title: "Claps received",
-      value: totalClaps,
-      icon: Heart,
-    },
-    {
-      title: "Comments",
-      value: totalComments,
-      icon: MessageCircle,
-    },
-    {
-      title: "Bookmarks",
-      value: totalBookmarks,
-      icon: Bookmark,
-    },
-  ];
-
   return (
     <div className="space-y-10 py-10">
       <div className="text-center">
@@ -68,31 +28,16 @@ const AdminDashboard = async () => {
         </p>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.title}
-              className="rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-slate-700 dark:bg-slate-900/80"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    {stat.title}
-                  </p>
-                  <p className="mt-3 text-3xl font-bold text-slate-900 dark:text-slate-100">
-                    {stat.value}
-                  </p>
-                </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-slate-100 text-slate-900 shadow-sm dark:bg-slate-800 dark:text-slate-100">
-                  <Icon size={24} />
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <AdminDashboardClient
+        counts={{
+          userCount,
+          blogCount,
+          totalViews,
+          totalClaps,
+          totalComments,
+          totalBookmarks,
+        }}
+      />
     </div>
   );
 };
