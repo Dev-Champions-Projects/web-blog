@@ -77,61 +77,62 @@ const UserDashboard = ({
         streak={streak}
         readerStreak={readerStreak}
       />
-      <div className="grid gap-4 lg:grid-cols-[1.4fr_0.95fr]">
+      {/* <div className="grid gap-4 lg:grid-cols-[1.4fr_0.95fr]"> */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
         <UserDashboardRecent posts={recentPosts} />
-        <div className="w-full min-w-0 flex flex-col gap-4">
-          <div className="w-full min-w-0 overflow-x-auto pb-2">
-            <UserDashboardChart
-              weeklyViews={weeklyViews}
-              topPosts={topViewedPosts}
-            />
-          </div>
-          <div className="w-full min-w-0 rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-              Reader engagement summary
-            </p>
-            {mostViewedPost ? (
-              <div className="mt-5 space-y-4">
-                <div className="rounded-3xl bg-slate-50 p-4 dark:bg-slate-950/70">
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Most viewed post
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
-                    {mostViewedPost.title}
-                  </p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {mostViewedPost.views} views
-                  </p>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-3xl bg-slate-50 p-4 dark:bg-slate-950/70">
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      Total unique readers
-                    </p>
-                    <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
-                      {totalReaders}
-                    </p>
-                  </div>
-                  <div className="rounded-3xl bg-slate-50 p-4 dark:bg-slate-950/70">
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      Weekly active readers
-                    </p>
-                    <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
-                      {weeklyActiveReaders}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <p className="mt-5 text-sm text-slate-600 dark:text-slate-400">
-                No reader engagement yet. Once students start reading, this
-                panel will track the most popular posts and active readers.
+        {/* <div className="w-full min-w-0 flex flex-col gap-4">
+          <div className="w-full min-w-0 overflow-x-auto pb-2"> */}
+        <UserDashboardChart
+          weeklyViews={weeklyViews}
+          topPosts={topViewedPosts}
+        />
+      </div>
+      <div className="w-full min-w-0 rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+          Reader engagement summary
+        </p>
+        {mostViewedPost ? (
+          <div className="mt-5 space-y-4">
+            <div className="rounded-3xl bg-slate-50 p-4 dark:bg-slate-950/70">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Most viewed post
               </p>
-            )}
+              <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
+                {mostViewedPost.title}
+              </p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {mostViewedPost.views} views
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-3xl bg-slate-50 p-4 dark:bg-slate-950/70">
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Total unique readers
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
+                  {totalReaders}
+                </p>
+              </div>
+              <div className="rounded-3xl bg-slate-50 p-4 dark:bg-slate-950/70">
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Weekly active readers
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
+                  {weeklyActiveReaders}
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <p className="mt-5 text-sm text-slate-600 dark:text-slate-400">
+            No reader engagement yet. Once students start reading, this panel
+            will track the most popular posts and active readers.
+          </p>
+        )}
       </div>
     </div>
+    //   </div>
+    // </div>
   );
 };
 
