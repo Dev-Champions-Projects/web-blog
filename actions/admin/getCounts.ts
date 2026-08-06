@@ -29,7 +29,7 @@ export const getCounts = async () => {
         totalClaps,
         totalComments,
         totalBookmarks,
-        totalViews: viewAggregate._sum.views ?? 0,
+        totalViews: viewAggregate._sum?.views ?? 0,
       },
     };
   } catch (error) {
