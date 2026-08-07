@@ -42,7 +42,8 @@ export const sendEmailVerificationToken = async (
   const emailVerificaitionLink = `${process.env.BASE_URL}/email-verification?token=${token}`;
 
   const res = await resend.emails.send({
-    from: "onboarding@resend.dev",
+    // from: "onboarding@resend.dev",
+    from: "no-reply@dev-champions.tech",
     to: email,
     subject: "Verify your Email 🎉",
     html: `<p>Click <a href="${emailVerificaitionLink}">here</a> to verify your email</p>`,
