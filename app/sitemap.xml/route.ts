@@ -1,8 +1,7 @@
-import { MetadataRoute } from "next";
 import { db } from "@/lib/db";
 import { siteConfig } from "@/lib/seo";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export async function GET() {
     const blogs = await db.blog.findMany({
         where: { isPublished: true },
         select: { id: true, createdAt: true },
@@ -10,20 +9,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         take: 1000,
     });
 
-    const posts = blogs.map((blog) => ({
-        url: `${siteConfig.url}/blog/details/${blog.id}`,
-        lastModified: blog.createdAt,
-    }));
-
-    return [
+    const urls = [
         {
             url: `${siteConfig.url}`,
-            lastModified: new Date(),
+            lastModified: new Date().toISOString(),
         },
         {
             url: `${siteConfig.url}/blog/feed/1`,
-            lastModified: new Date(),
+            lastModified: new Date().toISOString(),
         },
-        ...posts,
+        ...blogs.map((blog) => ({
+            url: `${siteConfig.url}/blog/details/${blog.id}`,
+            lastModified: blog.createdAt.toISOString(),
+        })),
     ];
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls
+            .map(
+                (item) => `  <url>
+    <loc>${item.url}</loc>
+    <lastmod>${item.lastModified}</lastmod>
+  </url>`
+            )
+            .join("\n")}
+</urlset>`;
+
+    return new Response(xml, {
+        headers: {
+            "Content-Type": "application/xml; charset=utf-8",
+        },
+    });
 }
