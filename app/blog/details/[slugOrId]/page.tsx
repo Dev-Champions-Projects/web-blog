@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { getBlogById, incrementBlogViews } from "@/actions/blogs/getblogbyid";
 import { auth } from "@/auth";
+import { db } from "@/lib/db";
+import {
+  getSeoDescription,
+  getSeoTitle,
+  getSocialImageUrl,
+  siteConfig,
+} from "@/lib/seo";
 import BlockNoteEditor from "@/components/blog/editor/BlockNoteEditorClient";
 import Reactions from "@/components/blog/Reactions";
 import UserSummary from "@/components/blog/UserSummary";
@@ -14,16 +22,107 @@ import "./editor.css";
 import Comments from "@/components/comments/Comments";
 
 interface BlogContentProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slugOrId: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: BlogContentProps): Promise<Metadata> {
+  const { slugOrId } = await params;
+  const blog = await db.blog.findUnique({
+    where: { id: slugOrId },
+    select: {
+      title: true,
+      content: true,
+      coverImage: true,
+      createdAt: true,
+      user: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (!blog) {
+    return {
+      title: siteConfig.title,
+      description: siteConfig.description,
+      openGraph: {
+        title: siteConfig.title,
+        description: siteConfig.description,
+        url: `${siteConfig.url}/blog/details/${slugOrId}`,
+        siteName: siteConfig.name,
+        type: "website",
+        images: [
+          {
+            url: getSocialImageUrl(),
+            alt: siteConfig.name,
+            width: 1200,
+            height: 630,
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: siteConfig.title,
+        description: siteConfig.description,
+        images: [getSocialImageUrl()],
+      },
+      alternates: {
+        canonical: `${siteConfig.url}/blog/details/${slugOrId}`,
+      },
+    };
+  }
+
+  const excerpt =
+    blog.content
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 160)
+      .replace(/\s+$/, "") || `Read ${blog.title} on ${siteConfig.name}.`;
+  const title = getSeoTitle(blog.title);
+  const url = `${siteConfig.url}/blog/details/${slugOrId}`;
+
+  return {
+    title,
+    description: getSeoDescription(excerpt),
+    openGraph: {
+      title,
+      description: excerpt,
+      url,
+      siteName: siteConfig.name,
+      type: "article",
+      publishedTime: blog.createdAt.toISOString(),
+      authors: [blog.user?.name ?? siteConfig.name],
+      images: [
+        {
+          url: getSocialImageUrl(blog.coverImage),
+          alt: blog.title,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: excerpt,
+      images: [getSocialImageUrl(blog.coverImage)],
+    },
+    alternates: {
+      canonical: url,
+    },
+  };
 }
 
 const BlogContent = async ({ params }: BlogContentProps) => {
   const session = await auth();
 
-  const { id } = await params;
+  const { slugOrId } = await params;
 
-  await incrementBlogViews({ blogId: id });
-  const res = await getBlogById({ blogId: id });
+  await incrementBlogViews({ blogId: slugOrId });
+  const res = await getBlogById({ blogId: slugOrId });
 
   if (!res.success)
     return <Alert error message="Error fetching blog content" />;

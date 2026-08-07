@@ -52,7 +52,8 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
   const resetLink = `${process.env.BASE_URL}/password-reset-form?token=${token}`;
 
   const res = await resend.emails.send({
-    from: "onboarding@resend.dev",
+    // from: "onboarding@resend.dev",
+    from: "no-reply@dev-champions.tech",
     to: email,
     subject: "Password reset link 🎉",
     html: `<p>Click <a href="${resetLink}">here</a> to reset your password!</p>`,

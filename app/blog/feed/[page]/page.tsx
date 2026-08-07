@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import { getPublishedBlogs } from "@/actions/blogs/get-published-blogs";
 import ListBlogs from "@/components/blog/ListBlogs";
 import Alert from "@/components/common/Alert";
 import Hero from "@/components/layout/Hero";
+import {
+  getSeoDescription,
+  getSeoTitle,
+  getSocialImageUrl,
+  siteConfig,
+} from "@/lib/seo";
 
 interface BlogFeedProps {
   params: Promise<{ page: string }>;
@@ -9,6 +16,60 @@ interface BlogFeedProps {
     tag?: string;
     title?: string;
   }>;
+}
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: BlogFeedProps): Promise<Metadata> {
+  const { page } = await params;
+  const { tag, title } = await searchParams;
+  const currentPage = parseInt(page, 10) || 1;
+
+  const pageTitle =
+    currentPage === 1
+      ? "Latest developer posts from Lagos, Nigeria and Africa"
+      : `Page ${currentPage} — Developer posts from Lagos, Nigeria`;
+
+  const pageDescription =
+    title || tag
+      ? getSeoDescription(
+          `Search results for ${title ?? tag} on Dev Champions. Browse developer tutorials, insight pieces, and community stories from Lagos and across Africa.`,
+        )
+      : getSeoDescription(
+          "Discover the latest developer tutorials, career growth guides, and technology insights from Lagos, Nigeria and the African developer community.",
+        );
+
+  const url = `${siteConfig.url}/blog/feed/${currentPage}`;
+
+  return {
+    title: getSeoTitle(pageTitle),
+    description: pageDescription,
+    openGraph: {
+      title: getSeoTitle(pageTitle),
+      description: pageDescription,
+      url,
+      siteName: siteConfig.name,
+      type: "website",
+      images: [
+        {
+          url: getSocialImageUrl(),
+          alt: siteConfig.name,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: getSeoTitle(pageTitle),
+      description: pageDescription,
+      images: [getSocialImageUrl()],
+    },
+    alternates: {
+      canonical: url,
+    },
+  };
 }
 
 const BlogFeed = async ({ params, searchParams }: BlogFeedProps) => {

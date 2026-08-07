@@ -10,6 +10,7 @@ import { EdgeStoreProvider } from "@/lib/edgestore";
 import { Toaster } from "react-hot-toast";
 import { SocketContextProvider } from "@/context/SocketContext";
 import Footer from "@/components/layout/Footer";
+import { metadataBase, siteConfig, getSocialImageUrl } from "@/lib/seo";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -18,10 +19,57 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Tech Path",
-  description:
-    "A blog for both developers and designers, sharing insights, tutorials, and stories from the tech world.",
-  icons: { icon: "/favicon.jpg" },
+  title: {
+    default: siteConfig.title,
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  metadataBase,
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.jpg",
+  },
+  openGraph: {
+    title: siteConfig.title,
+    description: siteConfig.description,
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    type: "website",
+    images: [
+      {
+        url: getSocialImageUrl(),
+        alt: siteConfig.description,
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.title,
+    description: siteConfig.description,
+    images: [getSocialImageUrl()],
+  },
+  keywords: [
+    "Lagos",
+    "Nigeria",
+    "Africa",
+    "developer blog",
+    "web development",
+    "programming tutorials",
+    "tech community",
+    "software engineering",
+    "career growth",
+  ],
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+  },
+  alternates: {
+    canonical: siteConfig.url,
+  },
 };
 
 export default async function RootLayout({
