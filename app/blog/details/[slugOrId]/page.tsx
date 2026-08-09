@@ -132,55 +132,52 @@ const BlogContent = async ({ params }: BlogContentProps) => {
   if (!blog) return <Alert error message="No blog found!" />;
 
   return (
-    // <div className="flex flex-col max-w-[900px] m-auto gap-6">
-    <div className="w-full flex flex-col items-center p-6 md:p-0">
-      <div className="flex max-w-6xl flex-col gap-6 justify-center">
-        {blog.coverImage && (
-          <div className="relative w-full h-[35vh] mt-2">
-            <Image
-              src={blog.coverImage}
-              fill
-              alt="Cover Image"
-              className="object-cover rounded"
-            />
-          </div>
+    <div className="flex flex-col max-w-[900px] m-auto gap-6">
+      {blog.coverImage && (
+        <div className="relative w-full h-[35vh] mt-2">
+          <Image
+            src={blog.coverImage}
+            fill
+            alt="Cover Image"
+            className="object-cover rounded"
+          />
+        </div>
+      )}
+      <div className="flex justify-between items-center pt-4">
+        {blog.user && (
+          <UserSummary user={blog.user} createdDate={blog.createdAt} />
         )}
-        <div className="flex justify-between items-center pt-4">
-          {blog.user && (
-            <UserSummary user={blog.user} createdDate={blog.createdAt} />
-          )}
-          {session?.user.userId === blog.userId && (
-            <Link className="text-orange-400" href={`/blog/edit/${blog.id}`}>
-              Edit
-            </Link>
-          )}
-        </div>
-        <div className="flex flex-col gap-2">
-          <Separator />
-          <Reactions blog={blog} />
-          <Separator />
-        </div>
-        <h2 className="text-2xl md:text-5xl font-semibold  sm:text-4xl lg:text-5xl  leading-tight sm:leading-snug break-words">
-          {blog.title}
-        </h2>
-        {!!blog.tags.length && (
-          <div className="flex  items-center gap-4 flex-wrap text-sm">
-            {[...blog.tags]
-              .sort((a, b) =>
-                a.localeCompare(b, undefined, { sensitivity: "base" }),
-              )
-              .map((tag) => (
-                <Tag key={tag}>{tag}</Tag>
-              ))}
-          </div>
+        {session?.user.userId === blog.userId && (
+          <Link className="text-orange-400" href={`/blog/edit/${blog.id}`}>
+            Edit
+          </Link>
         )}
-        <div>
-          <BlockNoteEditor editable={false} initialContent={blog.content} />
-        </div>
-        <Separator />
-        <Comments blog={blog} />
-        <RelatedPosts blog={blog} />
       </div>
+      <div className="flex flex-col gap-2">
+        <Separator />
+        <Reactions blog={blog} />
+        <Separator />
+      </div>
+      <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight sm:leading-snug break-words">
+        {blog.title}
+      </h2>
+      {!!blog.tags.length && (
+        <div className="flex items-center gap-4 flex-wrap">
+          {[...blog.tags]
+            .sort((a, b) =>
+              a.localeCompare(b, undefined, { sensitivity: "base" }),
+            )
+            .map((tag) => (
+              <Tag key={tag}>{tag}</Tag>
+            ))}
+        </div>
+      )}
+      <div>
+        <BlockNoteEditor editable={false} initialContent={blog.content} />
+      </div>
+      <Separator />
+      <Comments blog={blog} />
+      <RelatedPosts blog={blog} />
     </div>
   );
 };
