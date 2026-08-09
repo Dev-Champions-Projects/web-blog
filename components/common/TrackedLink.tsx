@@ -1,10 +1,16 @@
 "use client";
 
-import { useCallback, type ReactNode } from "react";
+import {
+  useCallback,
+  type ComponentPropsWithoutRef,
+  type ReactNode,
+} from "react";
 import Link, { type LinkProps } from "next/link";
 import { trackLinkClick, type AnalyticsEventParams } from "@/lib/analytics";
 
-interface TrackedLinkProps extends LinkProps {
+type AnchorProps = Omit<ComponentPropsWithoutRef<"a">, "href">;
+
+interface TrackedLinkProps extends LinkProps, AnchorProps {
   children: ReactNode;
   eventLabel: string;
   eventParams?: AnalyticsEventParams;
