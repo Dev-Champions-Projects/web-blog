@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 Disallow: /api/
-Sitemap: https://dev-champions.tech/sitemap.xml
-Host: https://dev-champions.tech
+Sitemap: https://path.dev-champions.tech/sitemap.xml
+Host: https://path.dev-champions.tech
