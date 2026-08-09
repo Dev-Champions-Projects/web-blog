@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, type ReactNode } from "react";
 import Link, { type LinkProps } from "next/link";
 import { trackLinkClick, type AnalyticsEventParams } from "@/lib/analytics";
 
 interface TrackedLinkProps extends LinkProps {
+  children: ReactNode;
   eventLabel: string;
   eventParams?: AnalyticsEventParams;
 }
