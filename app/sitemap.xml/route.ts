@@ -2,12 +2,18 @@ import { db } from "@/lib/db";
 import { siteConfig } from "@/lib/seo";
 
 export async function GET() {
-    const blogs = await db.blog.findMany({
-        where: { isPublished: true },
-        select: { id: true, createdAt: true },
-        orderBy: { createdAt: "desc" },
-        take: 1000,
-    });
+    let blogs = [] as Array<{ id: string; createdAt: Date }>;
+
+    try {
+        blogs = await db.blog.findMany({
+            where: { isPublished: true },
+            select: { id: true, createdAt: true },
+            orderBy: { createdAt: "desc" },
+            take: 1000,
+        });
+    } catch (error) {
+        console.error("Failed to build sitemap posts:", error);
+    }
 
     const urls = [
         {
@@ -24,17 +30,11 @@ export async function GET() {
         })),
     ];
 
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls
-            .map(
-                (item) => `  <url>
-    <loc>${item.url}</loc>
-    <lastmod>${item.lastModified}</lastmod>
-  </url>`
-            )
-            .join("\n")}
-</urlset>`;
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
+        .map(
+            (item) => `  <url>\n    <loc>${item.url}</loc>\n    <lastmod>${item.lastModified}</lastmod>\n  </url>`,
+        )
+        .join("\n")}\n</urlset>`;
 
     return new Response(xml, {
         headers: {
