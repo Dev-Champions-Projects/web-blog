@@ -4,25 +4,38 @@ import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "devChampionsConsent";
 
+type ConsentState = "loading" | "pending" | "accepted" | "declined";
+
 export default function ConsentBanner() {
-  const [accepted, setAccepted] = useState<boolean | null>(null);
+  const [consent, setConsent] = useState<ConsentState>("loading");
 
   useEffect(() => {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    setAccepted(stored === "accepted");
+
+    if (stored === "accepted") {
+      setConsent("accepted");
+      return;
+    }
+
+    if (stored === "declined") {
+      setConsent("declined");
+      return;
+    }
+
+    setConsent("pending");
   }, []);
 
   const handleAccept = () => {
     window.localStorage.setItem(STORAGE_KEY, "accepted");
-    setAccepted(true);
+    setConsent("accepted");
   };
 
   const handleDecline = () => {
     window.localStorage.setItem(STORAGE_KEY, "declined");
-    setAccepted(false);
+    setConsent("declined");
   };
 
-  if (accepted !== null) {
+  if (consent !== "pending") {
     return null;
   }
 
