@@ -11,6 +11,7 @@ import { Toaster } from "react-hot-toast";
 import { SocketContextProvider } from "@/context/SocketContext";
 import Footer from "@/components/layout/Footer";
 import { metadataBase, siteConfig, getSocialImageUrl } from "@/lib/seo";
+import Script from "next/script";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -56,11 +57,28 @@ export const metadata: Metadata = {
     "Nigeria",
     "Africa",
     "developer blog",
-    "web development",
+    "software services Lagos",
+    "AI services Lagos",
+    "web development Lagos",
+    "hire developers in Lagos",
+    "Nigerian tech blog",
+    "African developers",
     "programming tutorials",
-    "tech community",
     "software engineering",
+    "technology services",
     "career growth",
+    "web development",
+    "ai",
+    "artificial intelligence",
+    "machine learning",
+    "data science",
+    "deep learning",
+    "neural networks",
+    "computer vision",
+    "natural language processing",
+    "cybersecurity",
+    "cloud computing",
+    "devops",
   ],
   robots: {
     index: true,
@@ -69,6 +87,9 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: siteConfig.url,
+  },
+  verification: {
+    google: "UzZS0hHIxrUShTyrrxc42V15wyHI1mKcnzJaDIGzRFM",
   },
 };
 
@@ -87,6 +108,92 @@ export default async function RootLayout({
           poppins.variable,
         )}
       >
+        <Script id="gtm-script" strategy="afterInteractive">
+          {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','${process.env.NEXT_PUBLIC_GTM_ID}');`}
+        </Script>
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${process.env.NEXT_PUBLIC_GTM_ID}`}
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
+        <Script id="organization-schema" type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: siteConfig.name,
+            url: siteConfig.url,
+            logo: `${siteConfig.url}/favicon.jpg`,
+            description: siteConfig.description,
+            sameAs: [],
+          })}
+        </Script>
+        <Script id="local-business-schema" type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            name: siteConfig.name,
+            url: siteConfig.url,
+            logo: `${siteConfig.url}/favicon.jpg`,
+            description: siteConfig.description,
+            address: {
+              "@type": "PostalAddress",
+              addressLocality: "Lagos",
+              addressRegion: "Lagos",
+              addressCountry: "NG",
+            },
+            areaServed: [
+              {
+                "@type": "Country",
+                name: "Nigeria",
+              },
+            ],
+            sameAs: [],
+          })}
+        </Script>
+        <Script id="service-schema" type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Service",
+            name: `${siteConfig.name} Developer and AI Services`,
+            description:
+              "Web development, AI solutions, software engineering, and developer consulting services for Lagos and Nigeria.",
+            provider: {
+              "@type": "Organization",
+              name: siteConfig.name,
+              url: siteConfig.url,
+            },
+            areaServed: {
+              "@type": "Country",
+              name: "Nigeria",
+            },
+            serviceType: "Web Development, AI, and Software Consulting",
+            audience: {
+              "@type": "Audience",
+              audienceType:
+                "Developers, startups, and technology teams in Lagos",
+            },
+          })}
+        </Script>
+        <Script id="website-schema" type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: siteConfig.name,
+            url: siteConfig.url,
+            potentialAction: {
+              "@type": "SearchAction",
+              target: `${siteConfig.url}/search?q={search_term_string}`,
+              "query-input": "required name=search_term_string",
+            },
+          })}
+        </Script>
         <EdgeStoreProvider>
           <SessionProvider
             session={session}

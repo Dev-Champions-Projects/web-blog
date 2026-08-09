@@ -3,7 +3,7 @@ export const siteConfig = {
     title: "Dev Champions — Lagos developer blog for Nigeria and Africa",
     description:
         "Dev Champions is the Lagos-based developer blog empowering Nigerian and African coders with tutorials, career insight, tech stories, and community growth.",
-    url: "https://dev-champions.tech",
+    url: "https://path.dev-champions.tech",
     author: "Dev Champions",
     locale: "en-NG",
     keywords: [
