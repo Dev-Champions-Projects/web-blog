@@ -1,4 +1,5 @@
 import Link from "next/link";
+import TrackedLink from "../common/TrackedLink";
 import { MapPinIcon, PhoneIcon, MailIcon, ArrowRightIcon } from "lucide-react";
 import { SiFacebook, SiInstagram, SiX } from "react-icons/si";
 import { FaLinkedin } from "react-icons/fa";
@@ -84,13 +85,18 @@ const Footer = () => {
                 faster.
               </p>
 
-              <Link
+              <TrackedLink
                 href="/contact"
+                eventLabel="footer_consultation_click"
+                eventParams={{
+                  source: "footer_cta",
+                  action: "get_free_consultation",
+                }}
                 className="inline-flex items-center gap-2 rounded-xl bg-[#5A1C4B] px-5 py-3 font-medium text-white transition hover:bg-[#409FB6] hover:text-slate-950"
               >
                 Get Free Consultation
                 <ArrowRightIcon className="h-4 w-4" />
-              </Link>
+              </TrackedLink>
 
               <div className="flex items-center gap-3 pt-2">
                 <Link
@@ -284,13 +290,18 @@ const Footer = () => {
                   Tell us about your idea and get a free consultation.
                 </p>
 
-                <Link
+                <TrackedLink
                   href="https://calendly.com/dev-champions-info/30min"
+                  eventLabel="footer_quote_click"
+                  eventParams={{
+                    source: "footer_cta",
+                    action: "request_quote",
+                  }}
                   className="inline-flex items-center gap-2 font-medium text-[#5A1C4B] transition hover:text-[#409FB6] dark:text-[#7fd2eb]"
                 >
                   Request a Quote
                   <ArrowRightIcon className="h-4 w-4" />
-                </Link>
+                </TrackedLink>
               </div>
             </div>
           </div>

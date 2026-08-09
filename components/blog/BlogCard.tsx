@@ -1,4 +1,5 @@
 import Link from "next/link";
+import TrackedLink from "../common/TrackedLink";
 import { BlogWithUser } from "./ListBlogs";
 import Image from "next/image";
 import UserSummary from "./UserSummary";
@@ -36,12 +37,14 @@ const BlogCard = async ({
         </div>
         <div className="my-2 flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:gap-6">
           <div className="flex w-full min-w-0 flex-col justify-between gap-3">
-            <Link
+            <TrackedLink
               href={`/blog/details/${blog.id}`}
+              eventLabel="blog_detail_click"
+              eventParams={{ blogId: blog.id, source: "blog_card_title" }}
               className="text-xl font-bold sm:text-2xl"
             >
               {blog.title}
-            </Link>
+            </TrackedLink>
             {!!blog.tags.length && (
               <div className="flex flex-wrap items-center gap-2 my-1">
                 {blog.tags.map((tag) => (
@@ -53,8 +56,10 @@ const BlogCard = async ({
           </div>
 
           {blog.coverImage && (
-            <Link
+            <TrackedLink
               href={`/blog/details/${blog.id}`}
+              eventLabel="blog_detail_click"
+              eventParams={{ blogId: blog.id, source: "blog_card_image" }}
               className="relative block h-[220px] w-full overflow-hidden rounded-md md:h-[110px] md:w-[180px] md:max-w-[180px] md:shrink-0"
             >
               <Image
@@ -65,7 +70,7 @@ const BlogCard = async ({
                 sizes="(max-width: 768px) 100vw, 180px"
                 unoptimized
               />
-            </Link>
+            </TrackedLink>
           )}
         </div>
       </div>
