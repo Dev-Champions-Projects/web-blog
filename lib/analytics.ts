@@ -1,11 +1,11 @@
 declare global {
     interface Window {
-        dataLayer?: Array<Record<string, any>>;
-        gtag?: (...args: any[]) => void;
+        dataLayer?: Array<Record<string, unknown>>;
+        gtag?: (...args: unknown[]) => void;
     }
 }
 
-export type AnalyticsEventParams = Record<string, string | number | boolean | undefined>;
+export type AnalyticsEventParams = Record<string, string | number | boolean | null | undefined>;
 
 function pushDataLayer(eventName: string, params?: AnalyticsEventParams) {
     if (typeof window === "undefined") return;
