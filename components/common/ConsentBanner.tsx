@@ -25,13 +25,43 @@ export default function ConsentBanner() {
     setConsent("pending");
   }, []);
 
+  // const handleAccept = () => {
+  //   window.localStorage.setItem(STORAGE_KEY, "accepted");
+  //   setConsent("accepted");
+  // };
+
+  // const handleDecline = () => {
+  //   window.localStorage.setItem(STORAGE_KEY, "declined");
+  //   setConsent("declined");
+  // };
+
   const handleAccept = () => {
     window.localStorage.setItem(STORAGE_KEY, "accepted");
+
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("consent", "update", {
+        analytics_storage: "granted",
+        ad_storage: "denied",
+        ad_user_data: "denied",
+        ad_personalization: "denied",
+      });
+    }
+
     setConsent("accepted");
   };
 
   const handleDecline = () => {
     window.localStorage.setItem(STORAGE_KEY, "declined");
+
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("consent", "update", {
+        analytics_storage: "denied",
+        ad_storage: "denied",
+        ad_user_data: "denied",
+        ad_personalization: "denied",
+      });
+    }
+
     setConsent("declined");
   };
 
