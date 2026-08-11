@@ -19,7 +19,7 @@ export default function AnalyticsConsentLoader() {
     return null;
   }
 
-  if (!gaId && !gtmId) {
+  if (!gaId) {
     return null;
   }
 

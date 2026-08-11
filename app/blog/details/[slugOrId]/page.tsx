@@ -158,7 +158,9 @@ const BlogContent = async ({ params }: BlogContentProps) => {
         <Reactions blog={blog} />
         <Separator />
       </div>
-      <h2 className="text-2xl md:text-5xl font-semibold ">{blog.title}</h2>
+      <h2 className="text-2xl md:text-5xl align-center justify-center font-semibold ">
+        {blog.title}
+      </h2>
       {!!blog.tags.length && (
         <div className="flex items-center gap-4 flex-wrap">
           {[...blog.tags]
