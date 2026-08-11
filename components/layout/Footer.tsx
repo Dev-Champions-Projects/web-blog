@@ -229,7 +229,7 @@ const Footer = () => {
 
                 <li>
                   <Link
-                    href="https://blogs.dev-champions.tech/"
+                    href="https://path.dev-champions.tech/"
                     className="text-slate-600 transition hover:text-[#5A1C4B] dark:text-slate-300 dark:hover:text-[#7fd2eb]"
                   >
                     Blog
