@@ -117,7 +117,41 @@ export default async function RootLayout({
           poppins.variable,
         )}
       >
+        <Script id="google-consent-default" strategy="beforeInteractive">
+          {`
+        window.dataLayer = window.dataLayer || [];
+
+        window.gtag =
+          window.gtag ||
+          function () {
+            window.dataLayer.push(arguments);
+          };
+
+        var analyticsConsent = 'denied';
+
+        try {
+          if (
+            window.localStorage.getItem(
+              'devChampionsConsent'
+            ) === 'accepted'
+          ) {
+            analyticsConsent = 'granted';
+          }
+        } catch (error) {
+          analyticsConsent = 'denied';
+        }
+
+        window.gtag('consent', 'default', {
+          analytics_storage: analyticsConsent,
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied'
+        });
+      `}
+        </Script>
+
         <AnalyticsConsentLoader />
+
         <ConsentBanner />
         <Script id="organization-schema" type="application/ld+json">
           {JSON.stringify({

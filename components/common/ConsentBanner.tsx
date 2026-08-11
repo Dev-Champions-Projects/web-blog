@@ -6,6 +6,25 @@ const STORAGE_KEY = "devChampionsConsent";
 
 type ConsentState = "loading" | "pending" | "accepted" | "declined";
 
+type GoogleConsentValue = "granted" | "denied";
+
+type GoogleConsentSettings = {
+  analytics_storage: GoogleConsentValue;
+  ad_storage: GoogleConsentValue;
+  ad_user_data: GoogleConsentValue;
+  ad_personalization: GoogleConsentValue;
+};
+
+type GoogleGtag = (
+  command: "consent",
+  action: "update",
+  settings: GoogleConsentSettings,
+) => void;
+
+type WindowWithGtag = Window & {
+  gtag?: GoogleGtag;
+};
+
 export default function ConsentBanner() {
   const [consent, setConsent] = useState<ConsentState>("loading");
 
@@ -25,27 +44,21 @@ export default function ConsentBanner() {
     setConsent("pending");
   }, []);
 
-  // const handleAccept = () => {
-  //   window.localStorage.setItem(STORAGE_KEY, "accepted");
-  //   setConsent("accepted");
-  // };
+  const updateGoogleConsent = (analyticsStorage: GoogleConsentValue) => {
+    const gtag = (window as WindowWithGtag).gtag;
 
-  // const handleDecline = () => {
-  //   window.localStorage.setItem(STORAGE_KEY, "declined");
-  //   setConsent("declined");
-  // };
+    gtag?.("consent", "update", {
+      analytics_storage: analyticsStorage,
+      ad_storage: "denied",
+      ad_user_data: "denied",
+      ad_personalization: "denied",
+    });
+  };
 
   const handleAccept = () => {
     window.localStorage.setItem(STORAGE_KEY, "accepted");
 
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("consent", "update", {
-        analytics_storage: "granted",
-        ad_storage: "denied",
-        ad_user_data: "denied",
-        ad_personalization: "denied",
-      });
-    }
+    updateGoogleConsent("granted");
 
     setConsent("accepted");
   };
@@ -53,14 +66,7 @@ export default function ConsentBanner() {
   const handleDecline = () => {
     window.localStorage.setItem(STORAGE_KEY, "declined");
 
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("consent", "update", {
-        analytics_storage: "denied",
-        ad_storage: "denied",
-        ad_user_data: "denied",
-        ad_personalization: "denied",
-      });
-    }
+    updateGoogleConsent("denied");
 
     setConsent("declined");
   };
@@ -77,11 +83,13 @@ export default function ConsentBanner() {
             We use analytics to improve Dev Champions and make this site better
             for you.
           </p>
+
           <p className="mt-1 text-sm text-slate-300">
             By accepting, you agree that anonymous usage data may be collected
             to improve content, navigation, and service offerings.
           </p>
         </div>
+
         <div className="flex flex-wrap gap-2">
           <button
             onClick={handleDecline}
@@ -89,6 +97,7 @@ export default function ConsentBanner() {
           >
             Decline
           </button>
+
           <button
             onClick={handleAccept}
             className="rounded-xl bg-[#5A1C4B] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#409FB6]"
