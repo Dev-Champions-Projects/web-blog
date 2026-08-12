@@ -95,6 +95,7 @@ model Blog{
   userId String
   title String
   content String
+  slug String? @unique
   coverImage String?
   isPublished Boolean @default(false)
   views Int @default(0)

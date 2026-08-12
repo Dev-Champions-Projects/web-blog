@@ -6,6 +6,7 @@ import UserSummary from "./UserSummary";
 import Tag from "../common/Tag";
 import Reactions from "./Reactions";
 import { auth } from "@/auth";
+import { getBlogUrl } from "@/lib/slug";
 
 const BlogCard = async ({
   blog,
@@ -38,7 +39,7 @@ const BlogCard = async ({
         <div className="my-2 flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:gap-6">
           <div className="flex w-full min-w-0 flex-col justify-between gap-3">
             <TrackedLink
-              href={`/blog/details/${blog.id}`}
+              href={getBlogUrl(blog)}
               eventLabel="blog_detail_click"
               eventParams={{ blogId: blog.id, source: "blog_card_title" }}
               className="text-xl font-bold sm:text-2xl"
@@ -57,7 +58,7 @@ const BlogCard = async ({
 
           {blog.coverImage && (
             <TrackedLink
-              href={`/blog/details/${blog.id}`}
+              href={getBlogUrl(blog)}
               eventLabel="blog_detail_click"
               eventParams={{ blogId: blog.id, source: "blog_card_image" }}
               className="relative block h-[220px] w-full overflow-hidden rounded-md md:h-[110px] md:w-[180px] md:max-w-[180px] md:shrink-0"

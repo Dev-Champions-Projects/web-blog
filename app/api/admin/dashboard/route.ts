@@ -51,13 +51,6 @@ export async function GET(req: Request) {
                         title: true,
                         createdAt: true,
                         views: true,
-                        _count: {
-                            select: {
-                                claps: true,
-                                comments: true,
-                                bookmarks: true,
-                            },
-                        },
                         user: {
                             select: {
                                 name: true,
@@ -66,6 +59,43 @@ export async function GET(req: Request) {
                     },
                     take: 30,
                 });
+
+                const blogIds = posts.map((p) => p.id);
+
+                const clapGroups =
+                    blogIds.length > 0
+                        ? await db.clap.groupBy({
+                            by: ["blogId"],
+                            where: { blogId: { in: blogIds } },
+                            _count: { _all: true },
+                        })
+                        : [];
+
+                const bookmarkGroups =
+                    blogIds.length > 0
+                        ? await db.bookmark.groupBy({
+                            by: ["blogId"],
+                            where: { blogId: { in: blogIds } },
+                            _count: { _all: true },
+                        })
+                        : [];
+
+                const commentGroups =
+                    blogIds.length > 0
+                        ? await db.comment.groupBy({
+                            by: ["blogId"],
+                            where: { blogId: { in: blogIds } },
+                            _count: { _all: true },
+                        })
+                        : [];
+
+                const clapMap = new Map(clapGroups.map((g) => [g.blogId, g._count._all]));
+                const bookmarkMap = new Map(
+                    bookmarkGroups.map((g) => [g.blogId, g._count._all]),
+                );
+                const commentMap = new Map(
+                    commentGroups.map((g) => [g.blogId, g._count._all]),
+                );
 
                 return NextResponse.json({
                     success: {
@@ -76,9 +106,9 @@ export async function GET(req: Request) {
                             title: post.title,
                             createdAt: post.createdAt,
                             views: post.views,
-                            claps: post._count.claps,
-                            comments: post._count.comments,
-                            bookmarks: post._count.bookmarks,
+                            claps: clapMap.get(post.id) ?? 0,
+                            comments: commentMap.get(post.id) ?? 0,
+                            bookmarks: bookmarkMap.get(post.id) ?? 0,
                             authorName: post.user.name ?? "Unknown author",
                         })),
                     },

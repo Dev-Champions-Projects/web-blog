@@ -54,15 +54,34 @@ export const getBlogsByUserId = async ({
       },
     });
 
+    // defensive: dedupe blogs with identical title+content to avoid showing duplicate entries
+    // (this prevents UI duplication while investigating root cause in the DB)
+    const seen = new Map<string, typeof blogs[0]>();
+    const deduped: typeof blogs = [];
+
+    for (const b of blogs) {
+      const key = `${b.title}::${b.content}`;
+      if (!seen.has(key)) {
+        seen.set(key, b);
+        deduped.push(b);
+      } else {
+        // optional: log duplicate detection server-side for investigation
+        // console.warn(`Duplicate blog detected for user ${userId}: ${b.id}`);
+      }
+    }
+
+    const finalBlogs = deduped;
+
     const totalBlogsCount = await db.blog.count({
       where: {
         userId,
       },
     });
 
+    // Note: `hasMore` remains based on total count in DB; UI may show fewer items because duplicates were removed.
     const hasMore = totalBlogsCount > page * limit;
 
-    return { success: { blogs, hasMore } };
+    return { success: { blogs: finalBlogs, hasMore } };
   } catch (error) {
     return { error: "Error fetching blogs!" };
   }

@@ -102,6 +102,12 @@ const CreateBlogForm = ({ blog }: { blog?: Blog }) => {
 
           if (data.success) {
             setSuccess(data.success);
+            if (data.blogId) {
+              const slugPart = data.slug
+                ? `${data.slug}-${data.blogId}`
+                : data.blogId;
+              router.push(`/blog/details/${slugPart}`);
+            }
           }
         });
       } else {
@@ -112,6 +118,12 @@ const CreateBlogForm = ({ blog }: { blog?: Blog }) => {
 
           if (data.success) {
             setSuccess(data.success);
+            if (data.blogId) {
+              const slugPart = data.slug
+                ? `${data.slug}-${data.blogId}`
+                : data.blogId;
+              router.push(`/blog/details/${slugPart}`);
+            }
           }
         });
       }
@@ -131,6 +143,13 @@ const CreateBlogForm = ({ blog }: { blog?: Blog }) => {
 
           if (data.success) {
             setSuccess(data.success);
+            if (data.blogId) {
+              const slugPart = data.slug
+                ? `${data.slug}-${data.blogId}`
+                : data.blogId;
+              // navigate to draft view of the blog
+              router.push(`/blog/details/${slugPart}`);
+            }
           }
         });
       } else {
@@ -141,6 +160,12 @@ const CreateBlogForm = ({ blog }: { blog?: Blog }) => {
 
           if (data.success) {
             setSuccess(data.success);
+            if (data.blogId) {
+              const slugPart = data.slug
+                ? `${data.slug}-${data.blogId}`
+                : data.blogId;
+              router.push(`/blog/details/${slugPart}`);
+            }
           }
         });
       }
@@ -248,6 +273,7 @@ const CreateBlogForm = ({ blog }: { blog?: Blog }) => {
                 onClick={handleSubmit(onDelete)}
                 type="button"
                 label={isDeleting ? "Deleting..." : "Delete"}
+                disabled={isDeleting}
               />
             </div>
           )}
@@ -255,12 +281,14 @@ const CreateBlogForm = ({ blog }: { blog?: Blog }) => {
             <Button
               type="submit"
               label={isPublishing ? "Publishing..." : "Publish"}
+              disabled={isPublishing}
               className="bg-blue-700"
             />
             <Button
               type="button"
               label={isSavingAsDraft ? "Saving..." : "Save as Draft"}
               onClick={handleSubmit(onSaveDraft)}
+              disabled={isSavingAsDraft}
             />
           </div>
         </div>

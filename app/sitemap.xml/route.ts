@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { siteConfig } from "@/lib/seo";
+import { getBlogUrl } from "@/lib/slug";
 
 export async function GET() {
     let blogs = [] as Array<{ id: string; createdAt: Date }>;
@@ -7,7 +8,7 @@ export async function GET() {
     try {
         blogs = await db.blog.findMany({
             where: { isPublished: true },
-            select: { id: true, createdAt: true },
+            select: { id: true, createdAt: true, slug: true },
             orderBy: { createdAt: "desc" },
             take: 1000,
         });
@@ -25,7 +26,7 @@ export async function GET() {
             lastModified: new Date().toISOString(),
         },
         ...blogs.map((blog) => ({
-            url: `${siteConfig.url}/blog/details/${blog.id}`,
+            url: `${siteConfig.url}${getBlogUrl(blog as any)}`,
             lastModified: blog.createdAt.toISOString(),
         })),
     ];

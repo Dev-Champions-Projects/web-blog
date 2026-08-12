@@ -1,7 +1,9 @@
 import { getCounts } from "@/actions/admin/getCounts";
+import { getAdminMetrics } from "@/actions/admin/getAdminMetrics";
 import Heading from "../common/Heading";
 import Alert from "../common/Alert";
 import AdminDashboardClient from "./AdminDashboardClient";
+import AdminMetricsChart from "./AdminMetricsChart";
 
 const AdminDashboard = async () => {
   const res = await getCounts();
@@ -16,6 +18,11 @@ const AdminDashboard = async () => {
     totalComments = 0,
     totalBookmarks = 0,
   } = res.success ?? {};
+
+  const metricsRes = await getAdminMetrics(30);
+
+  const daily = metricsRes.success?.daily ?? [];
+  const topPosts = metricsRes.success?.topPosts ?? [];
 
   return (
     <div className="space-y-10 py-10">
@@ -38,6 +45,13 @@ const AdminDashboard = async () => {
           totalBookmarks,
         }}
       />
+
+      <div className="mt-10">
+        <Heading title="Site analytics" />
+        <div className="mt-4">
+          <AdminMetricsChart daily={daily} topPosts={topPosts} />
+        </div>
+      </div>
     </div>
   );
 };

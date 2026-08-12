@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getBlogById, incrementBlogViews } from "@/actions/blogs/getblogbyid";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { parseIdFromSlugOrId, getBlogUrl } from "@/lib/slug";
+import { redirect } from "next/navigation";
 import {
   getSeoDescription,
   getSeoTitle,
@@ -29,7 +31,8 @@ export async function generateMetadata({
   params,
 }: BlogContentProps): Promise<Metadata> {
   const { slugOrId } = await params;
-  const blog = await db.blog.findUnique({
+  // attempt to locate blog by id, parsed id from slug, or slug
+  let blog = await db.blog.findUnique({
     where: { id: slugOrId },
     select: {
       title: true,
@@ -43,6 +46,43 @@ export async function generateMetadata({
       },
     },
   });
+
+  if (!blog) {
+    const idCandidate = parseIdFromSlugOrId(slugOrId);
+    if (idCandidate && idCandidate !== slugOrId) {
+      blog = await db.blog.findUnique({
+        where: { id: idCandidate },
+        select: {
+          title: true,
+          content: true,
+          coverImage: true,
+          createdAt: true,
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      });
+    }
+  }
+
+  if (!blog) {
+    blog = await db.blog.findUnique({
+      where: { slug: slugOrId },
+      select: {
+        title: true,
+        content: true,
+        coverImage: true,
+        createdAt: true,
+        user: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+  }
 
   if (!blog) {
     return {
@@ -82,7 +122,8 @@ export async function generateMetadata({
       .slice(0, 160)
       .replace(/\s+$/, "") || `Read ${blog.title} on ${siteConfig.name}.`;
   const title = getSeoTitle(blog.title);
-  const url = `${siteConfig.url}/blog/details/${slugOrId}`;
+  const canonicalPath = getBlogUrl(blog as any);
+  const url = `${siteConfig.url}${canonicalPath}`;
 
   return {
     title,
@@ -130,6 +171,19 @@ const BlogContent = async ({ params }: BlogContentProps) => {
   const blog = res.success.blog;
 
   if (!blog) return <Alert error message="No blog found!" />;
+
+  // redirect to canonical slugged URL when available
+  try {
+    const canonicalPath = getBlogUrl(blog as any);
+    const incoming = slugOrId;
+    const canonicalSegment = canonicalPath.replace("/blog/details/", "");
+    if (canonicalSegment && incoming !== canonicalSegment) {
+      // 301 redirect to canonical URL
+      redirect(canonicalPath);
+    }
+  } catch (e) {
+    // ignore redirect errors and continue rendering
+  }
 
   return (
     <div className="flex flex-col max-w-[900px] m-auto gap-6">

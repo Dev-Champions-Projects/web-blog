@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { getBlogUrl } from "@/lib/slug";
 
 export const deleteComment = async (commentId: string) => {
   const session = await auth();
@@ -18,7 +19,11 @@ export const deleteComment = async (commentId: string) => {
     where: { id: comment.id },
   });
 
-  revalidatePath(`/blog/details/${comment.blogId}`);
+  try {
+    revalidatePath(getBlogUrl({ id: comment.blogId } as any));
+  } catch (e) {
+    revalidatePath(`/blog/details/${comment.blogId}`);
+  }
 
   return { success: "comment deleted" };
 };

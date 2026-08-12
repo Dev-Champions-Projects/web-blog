@@ -86,7 +86,7 @@ const UserButton = () => {
         )}
         <DropdownMenuItem>
           <button onClick={handleSignOut} className="flex items-center gap-2">
-            <LogOut size={18} /> Sign OUt
+            <LogOut size={18} /> Sign Out
           </button>
         </DropdownMenuItem>
       </DropdownMenuContent>

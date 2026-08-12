@@ -2,13 +2,15 @@
 
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { parseIdFromSlugOrId } from "@/lib/slug";
 
 export const incrementBlogViews = async ({ blogId }: { blogId: string }) => {
   if (!blogId) return;
 
   try {
+    const id = parseIdFromSlugOrId(blogId) || blogId;
     await db.blog.update({
-      where: { id: blogId },
+      where: { id },
       data: {
         views: {
           increment: 1,
@@ -27,7 +29,8 @@ export const getBlogById = async ({ blogId }: { blogId: string }) => {
   const userId = session?.user.userId;
 
   try {
-    const blog = await db.blog.findUnique({
+    // try id first
+    let blog = await db.blog.findUnique({
       where: { id: blogId },
       include: {
         user: {
@@ -61,6 +64,85 @@ export const getBlogById = async ({ blogId }: { blogId: string }) => {
         },
       },
     });
+
+    // if not found, maybe the param is a slugged string like `my-title-<id>` or the slug itself
+    if (!blog) {
+      const idCandidate = parseIdFromSlugOrId(blogId);
+      if (idCandidate && idCandidate !== blogId) {
+        blog = await db.blog.findUnique({
+          where: { id: idCandidate },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+            _count: {
+              select: {
+                claps: true,
+                comments: true,
+              },
+            },
+            claps: {
+              where: {
+                userId,
+              },
+              select: {
+                id: true,
+              },
+            },
+            bookmarks: {
+              where: {
+                userId,
+              },
+              select: {
+                id: true,
+              },
+            },
+          },
+        });
+      }
+    }
+
+    // final fallback: try to find by slug field
+    if (!blog) {
+      blog = await db.blog.findUnique({
+        where: { slug: blogId },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+            },
+          },
+          _count: {
+            select: {
+              claps: true,
+              comments: true,
+            },
+          },
+          claps: {
+            where: {
+              userId,
+            },
+            select: {
+              id: true,
+            },
+          },
+          bookmarks: {
+            where: {
+              userId,
+            },
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+    }
 
     return { success: { blog } };
   } catch (error) {

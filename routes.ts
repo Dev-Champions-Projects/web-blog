@@ -3,6 +3,7 @@ export const publicRoutes = [
   "/email-verification",
   "/password-email-form",
   "/password-reset-form",
+  "/api/health",
   /^\/blog\/feed\/\d+$/,
   /^\/blog\/details\/[\w-]+$/,
 ];
