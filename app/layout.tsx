@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+// import { Poppins } from "next/font/google";
+import { Caladea } from "next/font/google";
+
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import NavBar from "@/components/layout/NavBar";
@@ -15,10 +17,17 @@ import Script from "next/script";
 import ConsentBanner from "@/components/common/ConsentBanner";
 import AnalyticsConsentLoader from "@/components/common/AnalyticsConsentLoader";
 
-const poppins = Poppins({
-  variable: "--font-poppins",
+// const poppins = Poppins({
+//   variable: "--font-poppins",
+//   subsets: ["latin"],
+//   weight: ["400", "700"],
+// });
+
+const caladea = Caladea({
   subsets: ["latin"],
   weight: ["400", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -114,7 +123,7 @@ export default async function RootLayout({
       <body
         className={cn(
           "antialiased flex flex-col min-h-screen px-2",
-          poppins.variable,
+          caladea.className,
         )}
       >
         <Script id="google-consent-default" strategy="beforeInteractive">
