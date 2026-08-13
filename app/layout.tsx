@@ -120,6 +120,11 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#0f172a" />
+        <link rel="apple-touch-icon" href="/favicon.jpg" />
+      </head>
       <body
         className={cn(
           "antialiased flex flex-col min-h-screen px-2",
@@ -262,6 +267,12 @@ export default async function RootLayout({
             </SocketContextProvider>
           </SessionProvider>
         </EdgeStoreProvider>
+        {/* Register service worker for PWA */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}`,
+          }}
+        />
       </body>
     </html>
   );
