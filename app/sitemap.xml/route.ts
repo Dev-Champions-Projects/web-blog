@@ -3,7 +3,7 @@ import { siteConfig } from "@/lib/seo";
 import { getBlogUrl } from "@/lib/slug";
 
 export async function GET() {
-    let blogs = [] as Array<{ id: string; createdAt: Date; slug?: string }>;
+    let blogs = [] as Array<{ id: string; createdAt: Date; slug: string | null }>;
 
     try {
         blogs = await db.blog.findMany({
