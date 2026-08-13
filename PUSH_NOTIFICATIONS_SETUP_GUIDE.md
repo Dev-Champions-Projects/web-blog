@@ -251,7 +251,86 @@ Keep the following in mind:
 
 ---
 
-## 8. Production deployment notes
+## Manifest & DevTools checks
+
+When developing PWAs, use Chrome/Edge DevTools (Application tab) to inspect the manifest and service worker. The screenshots you provided show common issues — here's how to interpret and fix them.
+
+- Richer PWA Install UI won't be available: add at least one screenshot in the manifest. For desktop, include a screenshot with `form_factor` set to `wide`. For mobile, include a screenshot either without `form_factor` or with a value other than `wide`.
+- Icon failed to load: ensure every `src` path in `public/manifest.json` exists and is served from `/public`. Example: `/icons/pwa-icon.svg` must be present at `public/icons/pwa-icon.svg`.
+- Actual size mismatch (e.g. Actual size (18×16)px does not match specified size (192×192)px): this means the file you're referencing is smaller than the declared `sizes`. Fix by providing raster icons with the exact pixel dimensions.
+
+Recommended icon set (place files under `public/icons/`):
+
+- `icon-192.png` — 192x192 (type: `image/png`)
+- `icon-512.png` — 512x512 (type: `image/png`)
+- `pwa-icon.svg` — optional SVG for scalable use; also include a `maskable` PNG if you use `purpose: "maskable"`
+
+Example `icons` block for `public/manifest.json`:
+
+```json
+"icons": [
+  { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+  { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+  { "src": "/icons/pwa-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable any" }
+]
+```
+
+- App identity / Computed App ID: DevTools may show a computed App ID based on `start_url`. If you need a stable app id that matches a particular identity, add an `id` field to the manifest or ensure `start_url` is `/`.
+
+DevTools service worker checks and push testing:
+
+- Open `Application → Service workers` to confirm your worker is `activated and is running`.
+- Use the `Push` test button in DevTools to simulate an incoming push. Provide a JSON payload similar to the server-sent payload:
+
+```json
+{ "title": "Test push", "body": "This is a test", "url": "/blog/feed/1" }
+```
+
+- If the service worker is active and your `push` handler shows notifications, you should see the notification immediately when you click `Push` in DevTools. Click the notification to verify `notificationclick` handling navigates to the expected route.
+
+Quick fixes summary:
+
+- Add correctly sized PNG icon files and reference them in `manifest.json`.
+- Include a `maskable` icon if you want platform-specific masking to look correct.
+- Add screenshots for richer install UI (desktop `form_factor: "wide"` and mobile screenshots).
+- Ensure paths are absolute (start with `/`) and files are under `public/`.
+
+## 8. Free Neon + Render setup
+
+This is the lowest-cost setup for your project stack:
+
+- Neon stores the push subscriptions
+- Render hosts the app that sends notifications
+- `web-push` handles the browser push protocol
+- VAPID keys authenticate the server to the browser
+
+This is free in platform fees, but not free in engineering time.
+
+### Why this works well for your stack
+
+- Neon already gives you a database for storing subscription data
+- Render can host your API routes and background sending logic
+- The browser push API itself is free to use
+- You do not need a paid notification vendor to get started
+
+### Reality check
+
+The Render free tier can work, but it may sleep and cause delayed or inconsistent delivery. For production reliability, a paid always-on Render plan is better. But for a free MVP or prototype, this setup is realistic and workable.
+
+### Recommended production environment variables
+
+```env
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=...
+VAPID_PRIVATE_KEY=...
+VAPID_SUBJECT=mailto:hello@yourdomain.com
+DATABASE_URL=...
+NEXTAUTH_URL=https://yourdomain.com
+AUTH_SECRET=...
+```
+
+---
+
+## 9. Production deployment notes
 
 When deploying to production:
 
@@ -260,6 +339,7 @@ When deploying to production:
 - ensure the site is behind HTTPS
 - verify the manifest and app install flow still works after deployment
 - confirm notifications are enabled on the target browsers
+- keep the Render app awake enough to send notifications reliably
 
 Typical production env values:
 
@@ -271,7 +351,7 @@ VAPID_SUBJECT=mailto:hello@yourdomain.com
 
 ---
 
-## 9. Recommended implementation order
+## 10. Recommended implementation order
 
 1. Add VAPID keys and env vars
 2. Extend `public/sw.js` for `push` and `notificationclick`
@@ -284,7 +364,7 @@ VAPID_SUBJECT=mailto:hello@yourdomain.com
 
 ---
 
-## 10. Daily checklist before enabling in production
+## 11. Daily checklist before enabling in production
 
 - [ ] user has installed the PWA
 - [ ] browser permission is granted
@@ -296,7 +376,7 @@ VAPID_SUBJECT=mailto:hello@yourdomain.com
 
 ---
 
-## Useful next implementation files
+## 12. Useful next implementation files
 
 Likely files to update later:
 
