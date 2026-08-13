@@ -81,12 +81,12 @@ const Notifications = () => {
   const handleOpen = async (n: LatestNotification) => {
     console.log(n.entityType, n.senderId);
     if (n.entityType === "BLOG" && n.blogId) {
-      const path = getBlogUrl({ id: n.blogId, title: n.blog?.title } as any);
+      const path = getBlogUrl({ id: n.blogId, title: n.blog?.title });
       router.push(`${path}/#comments`);
     }
 
     if (n.entityType === "COMMENT" && n.comment?.blogId) {
-      const path = getBlogUrl({ id: n.comment?.blogId } as any);
+      const path = getBlogUrl({ id: n.comment?.blogId });
       router.push(`${path}/#${n.comment.id}`);
     }
 

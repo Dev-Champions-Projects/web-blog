@@ -35,6 +35,8 @@ export async function generateMetadata({
   let blog = await db.blog.findUnique({
     where: { id: slugOrId },
     select: {
+      id: true,
+      slug: true,
       title: true,
       content: true,
       coverImage: true,
@@ -53,6 +55,8 @@ export async function generateMetadata({
       blog = await db.blog.findUnique({
         where: { id: idCandidate },
         select: {
+          id: true,
+          slug: true,
           title: true,
           content: true,
           coverImage: true,
@@ -71,6 +75,8 @@ export async function generateMetadata({
     blog = await db.blog.findUnique({
       where: { slug: slugOrId },
       select: {
+        id: true,
+        slug: true,
         title: true,
         content: true,
         coverImage: true,
@@ -122,7 +128,11 @@ export async function generateMetadata({
       .slice(0, 160)
       .replace(/\s+$/, "") || `Read ${blog.title} on ${siteConfig.name}.`;
   const title = getSeoTitle(blog.title);
-  const canonicalPath = getBlogUrl(blog as any);
+  const canonicalPath = getBlogUrl({
+    id: blog.id,
+    title: blog.title,
+    slug: blog.slug,
+  });
   const url = `${siteConfig.url}${canonicalPath}`;
 
   return {
@@ -174,14 +184,18 @@ const BlogContent = async ({ params }: BlogContentProps) => {
 
   // redirect to canonical slugged URL when available
   try {
-    const canonicalPath = getBlogUrl(blog as any);
+    const canonicalPath = getBlogUrl({
+      id: blog.id,
+      title: blog.title,
+      slug: blog.slug,
+    });
     const incoming = slugOrId;
     const canonicalSegment = canonicalPath.replace("/blog/details/", "");
     if (canonicalSegment && incoming !== canonicalSegment) {
       // 301 redirect to canonical URL
       redirect(canonicalPath);
     }
-  } catch (e) {
+  } catch {
     // ignore redirect errors and continue rendering
   }
 

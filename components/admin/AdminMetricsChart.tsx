@@ -57,8 +57,6 @@ const MetricSmall = ({
 };
 
 const AdminMetricsChart = ({ daily, topPosts }: Props) => {
-  const dates = daily.map((d) => d.date);
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

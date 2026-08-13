@@ -9,7 +9,7 @@ export const slugify = (value: string) => {
         .replace(/^-+|-+$/g, "");
 };
 
-export const getBlogUrl = (blog: { id: string; title?: string; slug?: string }) => {
+export const getBlogUrl = (blog: { id: string; title?: string; slug?: string | null }) => {
     if (blog.slug) return `/blog/details/${blog.slug}-${blog.id}`;
     const title = blog.title || "";
     const s = slugify(title);

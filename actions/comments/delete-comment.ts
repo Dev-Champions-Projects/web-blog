@@ -20,7 +20,7 @@ export const deleteComment = async (commentId: string) => {
   });
 
   try {
-    revalidatePath(getBlogUrl({ id: comment.blogId } as any));
+    revalidatePath(getBlogUrl({ id: comment.blogId }));
   } catch (e) {
     revalidatePath(`/blog/details/${comment.blogId}`);
   }
