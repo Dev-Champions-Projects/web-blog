@@ -90,21 +90,23 @@ enum UserRole{
   USER
 }
 
-model Blog{
-  id String @id @default(cuid())
-  userId String
-  title String
-  content String
-  slug String? @unique
-  coverImage String?
-  isPublished Boolean @default(false)
-  views Int @default(0)
-  createdAt DateTime @default(now())
-  tags String[]
-  claps Clap[]
-  bookmarks Bookmark[]
-  blogViews BlogView[]
-  comments Comment[]
+model Blog {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  content     String
+  slug        String?  @unique
+  coverImage  String?
+  youtubeUrl  String?
+  isPublished Boolean  @default(false)
+  views       Int      @default(0)
+  createdAt   DateTime @default(now())
+  tags        String[]
+
+  claps         Clap[]
+  bookmarks     Bookmark[]
+  blogViews     BlogView[]
+  comments      Comment[]
   notifications Notification[]
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

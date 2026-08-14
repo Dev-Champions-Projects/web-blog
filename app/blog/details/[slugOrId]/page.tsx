@@ -19,6 +19,7 @@ import Tag from "@/components/common/Tag";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import Link from "next/link";
+import YouTubeEmbed from "@/components/blog/YouTubeEmbed";
 
 import "./editor.css";
 import Comments from "@/components/comments/Comments";
@@ -243,6 +244,11 @@ const BlogContent = async ({ params }: BlogContentProps) => {
       <div>
         <BlockNoteEditor editable={false} initialContent={blog.content} />
       </div>
+
+      {blog.youtubeUrl && (
+        <YouTubeEmbed url={blog.youtubeUrl} title={`${blog.title} video`} />
+      )}
+
       <Separator />
       <Comments blog={blog} />
       <RelatedPosts blog={blog} />

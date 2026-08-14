@@ -47,11 +47,13 @@ const CreateBlogForm = ({ blog }: { blog?: Blog }) => {
           title: blog.title,
           content: blog.content,
           coverImage: blog.coverImage || undefined,
+          youtubeUrl: blog.youtubeUrl || "",
           tags: blog.tags,
         }
       : {
           userId,
           isPublished: false,
+          youtubeUrl: "",
         },
   });
 
@@ -249,6 +251,22 @@ const CreateBlogForm = ({ blog }: { blog?: Blog }) => {
             </span>
           )}
         </fieldset>
+        <div className="mb-6">
+          <FormField
+            id="youtubeUrl"
+            type="url"
+            register={register}
+            errors={errors}
+            label="YouTube Video (Optional)"
+            placeholder="https://www.youtube.com/watch?v=..."
+            disabled={false}
+          />
+
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Optional: paste a YouTube video link. The video will appear at the
+            end of this article.
+          </p>
+        </div>
         <BlockNoteEditor
           onChange={onChange}
           initialContent={blog?.content ? blog.content : ""}

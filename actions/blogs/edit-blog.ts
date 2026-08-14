@@ -27,8 +27,13 @@ export const editBlog = async (values: BlogSchemaType, blogId: string) => {
 
   if (!blog) return { error: "Blog not found!" };
 
-  const updateData: any = { ...vFields.data };
+  const updateData: any = {
+    ...vFields.data,
 
+    youtubeUrl:
+      vFields.data.youtubeUrl ||
+      null,
+  };
   // if title changed, regenerate slug
   if (vFields.data.title && vFields.data.title !== blog.title) {
     const base = slugify(vFields.data.title || "");

@@ -60,6 +60,11 @@ export const createBlog = async (values: BlogSchemaType) => {
   const created = await db.blog.create({
     data: {
       ...vFields.data,
+
+      youtubeUrl:
+        vFields.data.youtubeUrl ||
+        null,
+
       slug: finalSlug,
     },
   });
