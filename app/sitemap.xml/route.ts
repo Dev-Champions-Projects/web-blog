@@ -1,41 +1,54 @@
+import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
 import { siteConfig } from "@/lib/seo";
 import { getBlogUrl } from "@/lib/slug";
 
-export async function GET() {
-    let blogs = [] as Array<{ id: string; createdAt: Date; slug: string | null }>;
+export async function GET(): Promise<Response> {
+    const blogs = await db.blog.findMany({
+        where: { isPublished: true },
+        select: {
+            id: true,
+            slug: true,
+            title: true,
+            createdAt: true,
+        },
+        orderBy: { createdAt: "desc" },
+    });
 
-    try {
-        blogs = await db.blog.findMany({
-            where: { isPublished: true },
-            select: { id: true, createdAt: true, slug: true },
-            orderBy: { createdAt: "desc" },
-            take: 1000,
-        });
-    } catch (error) {
-        console.error("Failed to build sitemap posts:", error);
-    }
-
-    const urls = [
+    const urls: MetadataRoute.Sitemap = [
         {
-            url: `${siteConfig.url}`,
-            lastModified: new Date().toISOString(),
+            url: siteConfig.url,
+            lastModified: new Date(),
+            changeFrequency: "daily",
+            priority: 1,
         },
         {
             url: `${siteConfig.url}/blog/feed/1`,
-            lastModified: new Date().toISOString(),
+            lastModified: new Date(),
+            changeFrequency: "daily",
+            priority: 0.9,
         },
         ...blogs.map((blog) => ({
             url: `${siteConfig.url}${getBlogUrl(blog)}`,
-            lastModified: blog.createdAt.toISOString(),
+            lastModified: blog.createdAt,
+            changeFrequency: "weekly" as const,
+            priority: 0.8,
         })),
     ];
 
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
-        .map(
-            (item) => `  <url>\n    <loc>${item.url}</loc>\n    <lastmod>${item.lastModified}</lastmod>\n  </url>`,
-        )
-        .join("\n")}\n</urlset>`;
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls
+            .map(
+                (item) => `  <url>
+    <loc>${item.url}</loc>
+    <lastmod>${new Date(item.lastModified ?? new Date()).toISOString()}</lastmod>
+    <changefreq>${item.changeFrequency ?? "weekly"}</changefreq>
+    <priority>${item.priority ?? 0.7}</priority>
+  </url>`,
+            )
+            .join("\n")}
+</urlset>`;
 
     return new Response(xml, {
         headers: {

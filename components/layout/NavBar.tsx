@@ -11,6 +11,7 @@ import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import Tags from "./Tags";
 import PWAInstallButton from "@/components/pwa/InstallPWAButton";
+import { trackEvent } from "@/lib/analytics";
 
 const NavBar = () => {
   const session = useSession();
@@ -26,7 +27,13 @@ const NavBar = () => {
         <div className="flex items-center justify-between gap-3 py-2">
           <div
             className="flex cursor-pointer items-center gap-1"
-            onClick={() => router.push("/blog/feed/1")}
+            onClick={() => {
+              trackEvent("select_content", {
+                content_type: "navigation",
+                item_name: "brand_home",
+              });
+              router.push("/blog/feed/1");
+            }}
           >
             <div className="text-xl font-bold tracking-tight text-[#5A1C4B] dark:text-[#7fd2eb]">
               TECH PATH
@@ -48,12 +55,24 @@ const NavBar = () => {
               <div className="flex items-center gap-3 text-sm font-medium text-slate-700 dark:text-slate-200">
                 <Link
                   href="/login"
+                  onClick={() =>
+                    trackEvent("select_content", {
+                      content_type: "navigation",
+                      item_name: "login",
+                    })
+                  }
                   className="transition hover:text-[#5A1C4B] dark:hover:text-[#7fd2eb]"
                 >
                   Login
                 </Link>
                 <Link
                   href="/register"
+                  onClick={() =>
+                    trackEvent("select_content", {
+                      content_type: "navigation",
+                      item_name: "register",
+                    })
+                  }
                   className="transition hover:text-[#5A1C4B] dark:hover:text-[#7fd2eb]"
                 >
                   Register

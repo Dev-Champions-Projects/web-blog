@@ -2,9 +2,15 @@ import { FaGithub, FaGoogle } from "react-icons/fa";
 import Button from "../common/Button";
 import { signIn } from "next-auth/react";
 import { LOGIN_REDIRECT } from "@/routes";
+import { trackEvent } from "@/lib/analytics";
 
 const SocialAuth = () => {
   const handleOnClick = (provider: "google" | "github") => {
+    trackEvent("social_login_click", {
+      provider,
+      page: "auth",
+    });
+
     signIn(provider, {
       callbackUrl: LOGIN_REDIRECT,
     });
