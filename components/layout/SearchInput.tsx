@@ -6,6 +6,7 @@ import { ChangeEventHandler, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import queryString, { StringifiableRecord } from "query-string";
 import { useDebounceValue } from "@/hooks/useDebounceValue";
+import { trackEvent } from "@/lib/analytics";
 
 const SearchInput = () => {
   const params = useSearchParams();
@@ -16,6 +17,10 @@ const SearchInput = () => {
   const debounceValue = useDebounceValue<string>(value);
 
   useEffect(() => {
+    if (!debounceValue && !params?.toString()) {
+      return;
+    }
+
     let currentQuery = {};
 
     if (params) {
@@ -37,6 +42,13 @@ const SearchInput = () => {
         skipEmptyString: true,
       },
     );
+
+    if (debounceValue.trim()) {
+      trackEvent("search", {
+        search_term: debounceValue.trim(),
+        content_type: "blog",
+      });
+    }
 
     router.push(url);
   }, [debounceValue, params, router]);

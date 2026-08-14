@@ -16,6 +16,7 @@ import { metadataBase, siteConfig, getSocialImageUrl } from "@/lib/seo";
 import Script from "next/script";
 import ConsentBanner from "@/components/common/ConsentBanner";
 import AnalyticsConsentLoader from "@/components/common/AnalyticsConsentLoader";
+import GoogleAnalyticsTracker from "@/components/common/GoogleAnalyticsTracker";
 
 // const poppins = Poppins({
 //   variable: "--font-poppins",
@@ -165,6 +166,7 @@ export default async function RootLayout({
         </Script>
 
         <AnalyticsConsentLoader />
+        <GoogleAnalyticsTracker />
 
         <ConsentBanner />
         <Script id="organization-schema" type="application/ld+json">

@@ -14,6 +14,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
 import { LOGIN_REDIRECT } from "@/routes";
 import Link from "next/link";
+import { trackEvent } from "@/lib/analytics";
 
 const LoginForm = () => {
   const searchParams = useSearchParams();
@@ -43,6 +44,11 @@ const LoginForm = () => {
     setError("");
     setSuccess("");
 
+    trackEvent("login_start", {
+      method: "email",
+      page: "login",
+    });
+
     startTransition(async () => {
       const res = await login(data);
 
@@ -53,6 +59,10 @@ const LoginForm = () => {
 
       if (res?.success) {
         setSuccess(res.success);
+        trackEvent("login_success", {
+          method: "email",
+          page: "login",
+        });
         return;
       }
 
@@ -65,9 +75,18 @@ const LoginForm = () => {
 
       if (signInResult?.error) {
         setError(signInResult.error);
+        trackEvent("login_failed", {
+          method: "email",
+          error: signInResult.error,
+          page: "login",
+        });
         return;
       }
 
+      trackEvent("login_success", {
+        method: "email",
+        page: "login",
+      });
       router.push(LOGIN_REDIRECT);
     });
   };

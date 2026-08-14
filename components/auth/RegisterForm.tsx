@@ -10,6 +10,7 @@ import { RegisterSchema, RegisterSchemaType } from "@/schemas/RegisterSchema";
 import { signUp } from "@/actions/auth/register";
 import { useState, useTransition } from "react";
 import Alert from "../common/Alert";
+import { trackEvent } from "@/lib/analytics";
 
 const RegisterForm = () => {
   const [isPending, startTransition] = useTransition();
@@ -25,10 +26,29 @@ const RegisterForm = () => {
   const onSubmit: SubmitHandler<RegisterSchemaType> = (data) => {
     setSuccess("");
     setError("");
+
+    trackEvent("register_start", {
+      method: "email",
+      page: "register",
+    });
+
     startTransition(() => {
       signUp(data).then((res) => {
-        setError(res.error);
+        if (res.error) {
+          setError(res.error);
+          trackEvent("register_failed", {
+            method: "email",
+            error: res.error,
+            page: "register",
+          });
+          return;
+        }
+
         setSuccess(res.success);
+        trackEvent("register_success", {
+          method: "email",
+          page: "register",
+        });
       });
     });
   };

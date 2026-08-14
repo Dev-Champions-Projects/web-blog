@@ -1,30 +1,36 @@
-declare global {
-    interface Window {
-        dataLayer?: Array<Record<string, unknown>>;
-        gtag?: (...args: unknown[]) => void;
-    }
-}
+import { sendGAEvent } from "@next/third-parties/google";
 
-export type AnalyticsEventParams = Record<string, string | number | boolean | null | undefined>;
+export type AnalyticsEventParams = Record<
+    string,
+    string | number | boolean | null | undefined
+>;
 
-function pushDataLayer(eventName: string, params?: AnalyticsEventParams) {
+export function trackEvent(
+    eventName: string,
+    params?: AnalyticsEventParams
+) {
     if (typeof window === "undefined") return;
 
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({ event: eventName, ...params });
+    sendGAEvent("event", eventName, params ?? {});
 }
 
-export function trackEvent(eventName: string, params?: AnalyticsEventParams) {
+export function trackPageView(path: string, title?: string) {
     if (typeof window === "undefined") return;
 
-    pushDataLayer(eventName, params);
+    const pageLocation = `${window.location.origin}${path}`;
+    const pageTitle = title || document.title || "Dev Champions";
 
-    if (typeof window.gtag === "function") {
-        window.gtag("event", eventName, params);
-    }
+    sendGAEvent("event", "page_view", {
+        page_location: pageLocation,
+        page_path: path,
+        page_title: pageTitle,
+    });
 }
 
-export function trackLinkClick(label: string, params?: AnalyticsEventParams) {
+export function trackLinkClick(
+    label: string,
+    params?: AnalyticsEventParams
+) {
     trackEvent("link_click", {
         label,
         ...params,
