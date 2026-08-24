@@ -10,6 +10,8 @@ import {
   siteConfig,
 } from "@/lib/seo";
 
+import BlogAlertsCard from "@/components/pwa/BlogAlertsCard";
+
 interface BlogFeedProps {
   params: Promise<{ page: string }>;
   searchParams: Promise<{
@@ -94,6 +96,9 @@ const BlogFeed = async ({ params, searchParams }: BlogFeedProps) => {
   return (
     <div>
       <Hero />
+      {currentPage === 1 && !searchObj.tag && !searchObj.title && (
+        <BlogAlertsCard />
+      )}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8 border-b border-slate-200 pb-6 dark:border-slate-700">
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#5A1C4B] dark:text-[#7fd2eb]">

@@ -1,214 +1,346 @@
-const CACHE_VERSION = "techpath-v2";
+const CACHE_VERSION = "techpath-v3";
 
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
+
 const PAGE_CACHE = `${CACHE_VERSION}-pages`;
+
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
 
-self.addEventListener("install", () => {
-  // Activate the new worker immediately.
-  self.skipWaiting();
-});
+/* =========================================
+   INSTALL
+========================================= */
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys
-            .filter((key) => !key.startsWith(CACHE_VERSION))
-            .map((key) => caches.delete(key)),
-        ),
-      )
-      .then(() => self.clients.claim()),
-  );
-});
+self.addEventListener(
+  "install",
+
+  () => {
+    self.skipWaiting();
+  },
+);
+
+/* =========================================
+   ACTIVATE
+========================================= */
+
+self.addEventListener(
+  "activate",
+
+  (event) => {
+    event.waitUntil(
+      caches
+        .keys()
+        .then((keys) =>
+          Promise.all(
+            keys
+              .filter((key) => !key.startsWith(CACHE_VERSION))
+              .map((key) => caches.delete(key)),
+          ),
+        )
+        .then(() => self.clients.claim()),
+    );
+  },
+);
+
+/* =========================================
+   PUSH NOTIFICATIONS
+========================================= */
+
+self.addEventListener(
+  "push",
+
+  (event) => {
+    let payload = {};
+
+    if (event.data) {
+      try {
+        payload = event.data.json();
+      } catch {
+        payload = {
+          body: event.data.text(),
+        };
+      }
+    }
+
+    const title = payload.title || "Tech Path";
+
+    const options = {
+      body: payload.body || "A new Tech Path update is available.",
+
+      icon: payload.icon || "/icons/icon-192.png",
+
+      badge: payload.badge || "/icons/icon-192.png",
+
+      tag: payload.tag || "tech-path-notification",
+
+      renotify: Boolean(payload.renotify),
+
+      data: {
+        url: payload.url || "/blog/feed/1",
+
+        type: payload.type || "general",
+      },
+    };
+
+    event.waitUntil(
+      self.registration.showNotification(
+        title,
+
+        options,
+      ),
+    );
+  },
+);
+
+/* =========================================
+   NOTIFICATION CLICK
+========================================= */
+
+self.addEventListener(
+  "notificationclick",
+
+  (event) => {
+    event.notification.close();
+
+    event.waitUntil(
+      (async () => {
+        const suppliedUrl = event.notification.data?.url || "/blog/feed/1";
+
+        let targetUrl;
+
+        try {
+          targetUrl = new URL(
+            suppliedUrl,
+
+            self.location.origin,
+          );
+
+          if (targetUrl.origin !== self.location.origin) {
+            targetUrl = new URL(
+              "/blog/feed/1",
+
+              self.location.origin,
+            );
+          }
+        } catch {
+          targetUrl = new URL(
+            "/blog/feed/1",
+
+            self.location.origin,
+          );
+        }
+
+        const windows = await self.clients.matchAll({
+          type: "window",
+
+          includeUncontrolled: true,
+        });
+
+        for (const client of windows) {
+          try {
+            const clientUrl = new URL(client.url);
+
+            if (clientUrl.origin === self.location.origin) {
+              await client.focus();
+
+              if ("navigate" in client) {
+                await client.navigate(targetUrl.href);
+              }
+
+              return;
+            }
+          } catch {
+            // Continue.
+          }
+        }
+
+        await self.clients.openWindow(targetUrl.href);
+      })(),
+    );
+  },
+);
 
 /* =========================================
    FETCH
 ========================================= */
 
-self.addEventListener("fetch", (event) => {
-  const request = event.request;
+self.addEventListener(
+  "fetch",
 
-  // Only handle GET requests.
-  if (request.method !== "GET") {
-    return;
-  }
+  (event) => {
+    const request = event.request;
 
-  const url = new URL(request.url);
+    if (request.method !== "GET") {
+      return;
+    }
 
-  // Only handle requests from Tech Path itself.
-  if (url.origin !== self.location.origin) {
-    return;
-  }
+    const url = new URL(request.url);
 
-  /* =========================================
-     NEVER CACHE THESE
-  ========================================= */
+    if (url.origin !== self.location.origin) {
+      return;
+    }
 
-  if (
-    url.pathname === "/sw.js" ||
-    url.pathname === "/manifest.json" ||
-    url.pathname.startsWith("/api/") ||
-    url.pathname.startsWith("/auth/") ||
-    url.pathname.startsWith("/admin/")
-  ) {
-    return;
-  }
+    /* =====================================
+       NEVER CACHE
+    ===================================== */
 
-  /* =========================================
-     HTML / PAGE NAVIGATION
+    if (
+      url.pathname === "/sw.js" ||
+      url.pathname === "/manifest.webmanifest" ||
+      url.pathname === "/manifest.json" ||
+      url.pathname.startsWith("/api/") ||
+      url.pathname.startsWith("/auth/") ||
+      url.pathname.startsWith("/admin/")
+    ) {
+      return;
+    }
 
-     NETWORK FIRST
-  ========================================= */
+    /* =====================================
+       HTML NAVIGATION — NETWORK FIRST
+    ===================================== */
 
-  if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response && response.ok) {
-            const responseClone = response.clone();
-
-            caches.open(PAGE_CACHE).then((cache) => {
-              cache.put(request, responseClone);
-            });
-          }
-
-          return response;
-        })
-        .catch(async () => {
-          const cachedPage = await caches.match(request);
-
-          if (cachedPage) {
-            return cachedPage;
-          }
-
-          return new Response(
-            `
-              <!DOCTYPE html>
-              <html lang="en">
-                <head>
-                  <meta charset="UTF-8" />
-                  <meta
-                    name="viewport"
-                    content="width=device-width, initial-scale=1"
-                  />
-                  <title>Tech Path - Offline</title>
-                </head>
-
-                <body
-                  style="
-                    font-family: Arial, sans-serif;
-                    max-width: 600px;
-                    margin: 80px auto;
-                    padding: 20px;
-                    text-align: center;
-                  "
-                >
-                  <h1>You are offline</h1>
-
-                  <p>
-                    Tech Path could not connect to the internet.
-                  </p>
-
-                  <p>
-                    Please check your connection and try again.
-                  </p>
-
-                  <button
-                    onclick="window.location.reload()"
-                    style="
-                      padding: 12px 22px;
-                      border: 0;
-                      border-radius: 8px;
-                      cursor: pointer;
-                    "
-                  >
-                    Try Again
-                  </button>
-                </body>
-              </html>
-            `,
-            {
-              headers: {
-                "Content-Type": "text/html",
-              },
-            },
-          );
-        }),
-    );
-
-    return;
-  }
-
-  /* =========================================
-     NEXT.JS STATIC FILES
-
-     CACHE FIRST
-  ========================================= */
-
-  if (url.pathname.startsWith("/_next/static/")) {
-    event.respondWith(
-      caches.match(request).then(async (cached) => {
-        if (cached) {
-          return cached;
-        }
-
-        const response = await fetch(request);
-
-        if (response && response.ok) {
-          const responseClone = response.clone();
-
-          const cache = await caches.open(STATIC_CACHE);
-
-          await cache.put(request, responseClone);
-        }
-
-        return response;
-      }),
-    );
-
-    return;
-  }
-
-  /* =========================================
-     IMAGES
-
-     STALE-WHILE-REVALIDATE
-  ========================================= */
-
-  if (request.destination === "image") {
-    event.respondWith(
-      caches.match(request).then((cached) => {
-        const networkRequest = fetch(request)
+    if (request.mode === "navigate") {
+      event.respondWith(
+        fetch(request)
           .then((response) => {
             if (response && response.ok) {
-              const responseClone = response.clone();
+              const copy = response.clone();
 
-              caches.open(IMAGE_CACHE).then((cache) => {
-                cache.put(request, responseClone);
-              });
+              void caches.open(PAGE_CACHE).then((cache) =>
+                cache.put(
+                  request,
+
+                  copy,
+                ),
+              );
             }
 
             return response;
           })
-          .catch(() => cached);
+          .catch(async () => {
+            const cached = await caches.match(request);
 
-        return cached || networkRequest;
-      }),
-    );
+            if (cached) {
+              return cached;
+            }
 
-    return;
-  }
+            return new Response(
+              `
+                  <!doctype html>
 
-  /*
-   * Everything else goes directly to the network.
-   *
-   * This is intentional.
-   *
-   * We do NOT want the service worker interfering
-   * with Next.js RSC requests, APIs, authentication,
-   * dynamic data, etc.
-   */
-});
+                  <html lang="en">
+                    <head>
+                      <meta charset="utf-8" />
+
+                      <meta
+                        name="viewport"
+                        content="width=device-width, initial-scale=1"
+                      />
+
+                      <title>Tech Path — Offline</title>
+                    </head>
+
+                    <body
+                      style="
+                        font-family: system-ui, sans-serif;
+                        max-width: 620px;
+                        margin: 80px auto;
+                        padding: 24px;
+                        text-align: center;
+                      "
+                    >
+                      <h1>You're offline</h1>
+
+                      <p>
+                        Tech Path could not connect to the internet.
+                      </p>
+
+                      <button
+                        onclick="location.reload()"
+                        style="
+                          padding: 12px 20px;
+                          border: 0;
+                          border-radius: 10px;
+                          cursor: pointer;
+                        "
+                      >
+                        Try again
+                      </button>
+                    </body>
+                  </html>
+                `,
+
+              {
+                headers: {
+                  "Content-Type": "text/html",
+                },
+              },
+            );
+          }),
+      );
+
+      return;
+    }
+
+    /* =====================================
+       NEXT STATIC — CACHE FIRST
+    ===================================== */
+
+    if (url.pathname.startsWith("/_next/static/")) {
+      event.respondWith(
+        caches.match(request).then(async (cached) => {
+          if (cached) {
+            return cached;
+          }
+
+          const response = await fetch(request);
+
+          if (response && response.ok) {
+            const copy = response.clone();
+
+            const cache = await caches.open(STATIC_CACHE);
+
+            await cache.put(
+              request,
+
+              copy,
+            );
+          }
+
+          return response;
+        }),
+      );
+
+      return;
+    }
+
+    /* =====================================
+       IMAGES — STALE WHILE REVALIDATE
+    ===================================== */
+
+    if (request.destination === "image") {
+      event.respondWith(
+        caches.match(request).then((cached) => {
+          const network = fetch(request)
+            .then((response) => {
+              if (response && response.ok) {
+                const copy = response.clone();
+
+                void caches.open(IMAGE_CACHE).then((cache) =>
+                  cache.put(
+                    request,
+
+                    copy,
+                  ),
+                );
+              }
+
+              return response;
+            })
+            .catch(() => cached);
+
+          return cached || network;
+        }),
+      );
+    }
+  },
+);

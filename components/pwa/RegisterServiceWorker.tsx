@@ -5,50 +5,100 @@ import { useEffect } from "react";
 export default function RegisterServiceWorker() {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) {
+      console.warn(
+        "Tech Path PWA: Service workers are not supported in this browser.",
+      );
+
       return;
     }
 
-    let refreshing = false;
+    /*
+     * Keep service workers away from
+     * normal Next.js development mode.
+     *
+     * Use:
+     *
+     * npm run build
+     * npm start
+     *
+     * for local PWA testing.
+     */
 
-    const registerServiceWorker = async () => {
+    if (process.env.NODE_ENV !== "production") {
+      console.info(
+        "Tech Path PWA: service worker skipped in development mode.",
+      );
+
+      return;
+    }
+
+    let cancelled = false;
+
+    async function register() {
       try {
-        const registration = await navigator.serviceWorker.register("/sw.js", {
-          scope: "/",
-          updateViaCache: "none",
+        const registration = await navigator.serviceWorker.register(
+          "/sw.js",
+
+          {
+            scope: "/",
+
+            updateViaCache: "none",
+          },
+        );
+
+        if (cancelled) {
+          return;
+        }
+
+        console.info("Tech Path service worker registered:", {
+          scope: registration.scope,
+
+          active: registration.active?.state || null,
+
+          waiting: registration.waiting?.state || null,
+
+          installing: registration.installing?.state || null,
         });
 
-        // Explicitly check for a newer service worker.
+        /*
+         * Always check the server for
+         * a newer sw.js.
+         */
+
         await registration.update();
 
-        console.log("Tech Path service worker registered:", registration.scope);
+        /*
+         * Log worker transitions.
+         */
+
+        registration.addEventListener(
+          "updatefound",
+
+          () => {
+            const worker = registration.installing;
+
+            if (!worker) {
+              return;
+            }
+
+            worker.addEventListener(
+              "statechange",
+
+              () => {
+                console.info("Tech Path service worker state:", worker.state);
+              },
+            );
+          },
+        );
       } catch (error) {
-        console.warn("Tech Path service worker registration failed:", error);
+        console.error("Tech Path service worker registration failed:", error);
       }
-    };
+    }
 
-    const handleControllerChange = () => {
-      if (refreshing) {
-        return;
-      }
-
-      refreshing = true;
-
-      // Reload once so the page and new worker use the same version.
-      window.location.reload();
-    };
-
-    navigator.serviceWorker.addEventListener(
-      "controllerchange",
-      handleControllerChange,
-    );
-
-    registerServiceWorker();
+    void register();
 
     return () => {
-      navigator.serviceWorker.removeEventListener(
-        "controllerchange",
-        handleControllerChange,
-      );
+      cancelled = true;
     };
   }, []);
 

@@ -74,10 +74,17 @@ export const SocketContextProvider = ({
     socket.on("disconnect", onDisconnect);
     socket.on("getNotifications", onNotification);
 
+    // return () => {
+    //   socket.off("connect", onConnect);
+    //   socket.off("disconnect", onDisconnect);
+    //   socket.on("getNotifications", onNotification);
+    // };
     return () => {
       socket.off("connect", onConnect);
+
       socket.off("disconnect", onDisconnect);
-      socket.on("getNotifications", onNotification);
+
+      socket.off("getNotifications", onNotification);
     };
   }, [socket]);
 

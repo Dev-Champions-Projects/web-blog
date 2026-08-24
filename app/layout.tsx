@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-// import { Poppins } from "next/font/google";
+import type { Metadata, Viewport } from "next";
 import { Caladea } from "next/font/google";
 
 import "./globals.css";
@@ -18,6 +17,7 @@ import ConsentBanner from "@/components/common/ConsentBanner";
 import AnalyticsConsentLoader from "@/components/common/AnalyticsConsentLoader";
 import GoogleAnalyticsTracker from "@/components/common/GoogleAnalyticsTracker";
 
+import RegisterServiceWorker from "@/components/pwa/RegisterServiceWorker";
 // const poppins = Poppins({
 //   variable: "--font-poppins",
 //   subsets: ["latin"],
@@ -31,17 +31,48 @@ const caladea = Caladea({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#5A1C4B",
+
+  colorScheme: "light dark",
+};
+
 export const metadata: Metadata = {
+  applicationName: "Tech Path",
   title: {
     default: siteConfig.title,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
   metadataBase,
+
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/favicon.jpg",
+    icon: [
+      {
+        url: "/icons/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+
+      {
+        url: "/icons/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
+
+    apple: [
+      {
+        url: "/icons/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Tech Path",
+    statusBarStyle: "default",
   },
   openGraph: {
     title: siteConfig.title,
@@ -122,8 +153,6 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#0f172a" />
         <link rel="apple-touch-icon" href="/favicon.jpg" />
       </head>
       <body
@@ -132,6 +161,8 @@ export default async function RootLayout({
           caladea.className,
         )}
       >
+        <RegisterServiceWorker />
+
         <Script id="google-consent-default" strategy="beforeInteractive">
           {`
         window.dataLayer = window.dataLayer || [];
@@ -270,11 +301,6 @@ export default async function RootLayout({
           </SessionProvider>
         </EdgeStoreProvider>
         {/* Register service worker for PWA */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}`,
-          }}
-        />
       </body>
     </html>
   );

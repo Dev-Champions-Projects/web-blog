@@ -1,116 +1,251 @@
 "use server";
 
-import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import {
+  auth,
+} from "@/auth";
 
-export const getNotifications = async () => {
-  const session = await auth();
+import {
+  db,
+} from "@/lib/db";
 
-  if (!session?.user) {
-    return { error: "Not logged in!" };
-  }
 
-  const userId = session.user.userId;
+export const getNotifications =
+  async () => {
+    const session =
+      await auth();
 
-  try {
-    const notifications = await db.notification.findMany({
-      where: { recipientId: userId },
-      include: {
-        sender: {
-          select: {
-            name: true,
-            id: true,
-          },
-        },
-        blog: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-        comment: {
-          select: {
-            id: true,
-            content: true,
-            blogId: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 100,
-    });
 
-    const count = await db.notification.count({
-      where: { recipientId: userId },
-    });
-
-    if (count > 100) {
-      const oldNotifications = await db.notification.findMany({
-        where: { recipientId: userId },
-        orderBy: { createdAt: "desc" },
-        skip: 100,
-        select: { id: true },
-      });
-
-      const oldNotificationIds = oldNotifications.map((n) => n.id);
-
-      await db.notification.deleteMany({
-        where: { id: { in: oldNotificationIds } },
-      });
+    if (
+      !session?.user
+    ) {
+      return {
+        error:
+          "Not logged in!",
+      };
     }
 
-    const unreadCount = await db.notification.count({
-      where: { recipientId: userId, isRead: false },
-    });
 
-    const formattedNotifications = notifications.map((n) => {
-      let content = "";
+    const userId =
+      session.user
+        .userId;
 
-      switch (n.type) {
-        case "NEW_COMMENT":
-          content = `${
-            n.sender.name || "Someone"
-          } commented on your blog post: "${n.blog?.title}"`;
-          break;
 
-        case "COMMENT_REPLY":
-          content = `${n.sender.name || "Someone"} replied to your comment: "${
-            n.comment?.content
-          }"`;
-          break;
+    try {
+      const notifications =
+        await db
+          .notification
+          .findMany({
+            where: {
+              recipientId:
+                userId,
+            },
 
-        case "NEW_CLAP":
-          content = `${n.sender.name || "Someone"} clapped your blog: "${
-            n.blog?.title
-          }"`;
-          break;
+            include: {
+              sender: {
+                select: {
+                  name:
+                    true,
 
-        case "FOLLOW":
-          content = `${n.sender?.name || "Someone"} followed you.`;
-          break;
+                  id:
+                    true,
+                },
+              },
 
-        case "SYSTEM_ALERT":
-          content = `System Alert: ${n.content}`;
-          break;
+              blog: {
+                select: {
+                  id:
+                    true,
 
-        default:
-          content = `New notification from ${n.sender.name || "Unknown"}`;
-          break;
+                  title:
+                    true,
+
+                  slug:
+                    true,
+                },
+              },
+
+              comment: {
+                select: {
+                  id:
+                    true,
+
+                  content:
+                    true,
+
+                  blogId:
+                    true,
+                },
+              },
+            },
+
+            orderBy: {
+              createdAt:
+                "desc",
+            },
+
+            take:
+              100,
+          });
+
+
+      const count =
+        await db
+          .notification
+          .count({
+            where: {
+              recipientId:
+                userId,
+            },
+          });
+
+
+      if (
+        count >
+        100
+      ) {
+        const oldNotifications =
+          await db
+            .notification
+            .findMany({
+              where: {
+                recipientId:
+                  userId,
+              },
+
+              orderBy: {
+                createdAt:
+                  "desc",
+              },
+
+              skip:
+                100,
+
+              select: {
+                id:
+                  true,
+              },
+            });
+
+
+        await db
+          .notification
+          .deleteMany({
+            where: {
+              id: {
+                in:
+                  oldNotifications.map(
+                    (
+                      notification,
+                    ) =>
+                      notification.id,
+                  ),
+              },
+            },
+          });
       }
 
-      return {
-        ...n,
-        content,
-      };
-    });
 
-    return {
-      success: {
-        notifications: formattedNotifications,
-        unreadNotificationCount: unreadCount,
-      },
-    };
-  } catch (error: any) {
-    return { error: error.message || "Failed to fetch notifications" };
-  }
-};
+      const unreadCount =
+        await db
+          .notification
+          .count({
+            where: {
+              recipientId:
+                userId,
+
+              isRead:
+                false,
+            },
+          });
+
+
+      const formattedNotifications =
+        notifications.map(
+          (
+            notification,
+          ) => {
+            let content =
+              "";
+
+
+            switch (
+            notification.type
+            ) {
+              case "NEW_COMMENT":
+                content =
+                  `${notification.sender.name || "Someone"} commented on your blog post: "${notification.blog?.title}"`;
+
+                break;
+
+
+              case "COMMENT_REPLY":
+                content =
+                  `${notification.sender.name || "Someone"} replied to your comment: "${notification.comment?.content}"`;
+
+                break;
+
+
+              case "NEW_CLAP":
+                content =
+                  `${notification.sender.name || "Someone"} clapped your blog: "${notification.blog?.title}"`;
+
+                break;
+
+
+              case "FOLLOW":
+                content =
+                  `${notification.sender.name || "Someone"} followed you.`;
+
+                break;
+
+
+              case "NEW_ARTICLE":
+                content =
+                  `New on Tech Path: "${notification.blog?.title || notification.content || "New article"}"`;
+
+                break;
+
+
+              case "SYSTEM_ALERT":
+                content =
+                  notification.content ||
+                  "Tech Path update";
+
+                break;
+
+
+              default:
+                content =
+                  `New notification from ${notification.sender.name || "Unknown"}`;
+            }
+
+
+            return {
+              ...notification,
+
+              content,
+            };
+          },
+        );
+
+
+      return {
+        success: {
+          notifications:
+            formattedNotifications,
+
+          unreadNotificationCount:
+            unreadCount,
+        },
+      };
+    } catch (
+    error:
+      any
+    ) {
+      return {
+        error:
+          error.message ||
+          "Failed to fetch notifications",
+      };
+    }
+  };
