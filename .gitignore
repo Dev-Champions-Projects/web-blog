@@ -43,3 +43,6 @@ next-env.d.ts
 database-backups/
 *.dump
 *.backup
+
+# Local database backups
+/database-backups/
