@@ -1,39 +1,42 @@
 datasource db {
-  provider  = "postgresql"
-  url  	    = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
+
 generator client {
   provider = "prisma-client-js"
 }
 
 model User {
-  id            String          @id @default(cuid())
-  name          String?
-  email         String          @unique
-  password      String?
-  emailVerified DateTime?
-  image         String?
-  bio           String?
-  tags          String[]
-  accounts      Account[]
-  blogs Blog[]
-  blogViews BlogView[]
-  claps Clap[]
-  followers Follow[] @relation("UserAsFollowed") // those who follow this user
-  followings Follow[] @relation("UserAsFollower") // those followed by this user
-  commentClaps CommentClap[]
-  bookmarks Bookmark[]
-  comments Comment[]
-  repliedToComments Comment[] @relation("ReplyToUser")
+  id                    String         @id @default(cuid())
+  name                  String?
+  email                 String         @unique
+  password              String?
+  emailVerified         DateTime?
+  image                 String?
+  bio                   String?
+  tags                  String[]
+  accounts              Account[]
+  blogs                 Blog[]
+  blogViews             BlogView[]
+  claps                 Clap[]
+  followers             Follow[]       @relation("UserAsFollowed") // those who follow this user
+  followings            Follow[]       @relation("UserAsFollower") // those followed by this user
+  commentClaps          CommentClap[]
+  bookmarks             Bookmark[]
+  comments              Comment[]
+  repliedToComments     Comment[]      @relation("ReplyToUser")
   receivedNotifications Notification[] @relation("NotificationReceived")
-  sentNotifications Notification[] @relation("NotificationSent")
- 
+  sentNotifications     Notification[] @relation("NotificationSent")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   role UserRole @default(USER)
+
+  webPushSubscriptions WebPushSubscription[]
 }
- 
+
 model Account {
   userId            String
   type              String
@@ -46,61 +49,62 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
- 
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@id([provider, providerAccountId])
 }
 
 model Follow {
-  id String @id @default(cuid())
-  followerId String //user who follows
+  id          String   @id @default(cuid())
+  followerId  String //user who follows
   followingId String //user being followed
-  createAt DateTime @default(now())
+  createAt    DateTime @default(now())
 
-  follower User @relation("UserAsFollower", fields: [followerId], references: [id], onDelete: Cascade) // the one following
+  follower  User @relation("UserAsFollower", fields: [followerId], references: [id], onDelete: Cascade) // the one following
   following User @relation("UserAsFollowed", fields: [followingId], references: [id], onDelete: Cascade) // the one followed
 
   @@unique([followerId, followingId])
 }
 
-model EmailVerificationToken{
-  id String @id @default(cuid())
-  email String
-  token String @unique
+model EmailVerificationToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
   expires DateTime
 
   @@unique([email, token])
 }
 
-model PasswordResetToken{
-  id String @id @default(cuid())
-  email String
-  token String @unique
+model PasswordResetToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
   expires DateTime
 
   @@unique([email, token])
 }
 
-enum UserRole{
+enum UserRole {
   ADMIN
   USER
 }
 
 model Blog {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   userId      String
   title       String
   content     String
-  slug        String?  @unique
+  slug        String?   @unique
   coverImage  String?
   youtubeUrl  String?
-  isPublished Boolean  @default(false)
-  views       Int      @default(0)
-  createdAt   DateTime @default(now())
+  isPublished Boolean   @default(false)
+  views       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  publishedAt DateTime?
   tags        String[]
 
   claps         Clap[]
@@ -113,9 +117,9 @@ model Blog {
 }
 
 model Clap {
-  id String @id @default(cuid())
-  userId String
-  blogId String
+  id        String   @id @default(cuid())
+  userId    String
+  blogId    String
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -123,10 +127,11 @@ model Clap {
 
   @@unique([userId, blogId])
 }
+
 model Bookmark {
-  id String @id @default(cuid())
-  userId String
-  blogId String
+  id        String   @id @default(cuid())
+  userId    String
+  blogId    String
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -136,61 +141,92 @@ model Bookmark {
 }
 
 model Comment {
-  id String @id @default(cuid())
-  blogId String
-  userId String
-  parentId String?
+  id              String         @id @default(cuid())
+  blogId          String
+  userId          String
+  parentId        String?
   repliedToUserId String?
-  content String
-  createdAt DateTime @default(now())
-  claps CommentClap[]
-  notification Notification[]
+  content         String
+  createdAt       DateTime       @default(now())
+  claps           CommentClap[]
+  notification    Notification[]
 
-  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  parent Comment? @relation("OneLevelThread", fields: [parentId], references: [id], onDelete: Cascade)
-  replies Comment[] @relation("OneLevelThread")
-  repliedToUser User? @relation("ReplyToUser", fields: [repliedToUserId], references: [id])
+  blog          Blog      @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent        Comment?  @relation("OneLevelThread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies       Comment[] @relation("OneLevelThread")
+  repliedToUser User?     @relation("ReplyToUser", fields: [repliedToUserId], references: [id])
 }
 
 model CommentClap {
-  id String @id @default(cuid())
-  userId String
+  id        String   @id @default(cuid())
+  userId    String
   commentId String
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   @@unique([userId, commentId])
 }
 
 model Notification {
-  id String @id @default(cuid())
+  id          String           @id @default(cuid())
   recipientId String
-  senderId String
-  type NotificationType
-  blogId String?
-  commentId String?
-  entityType EntityType?
-  content String?
-  isRead Boolean @default(false)
+  senderId    String
+  type        NotificationType
+  blogId      String?
+  commentId   String?
+  entityType  EntityType?
+  content     String?
+  url         String?
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  recipient User     @relation("NotificationReceived", fields: [recipientId], references: [id], onDelete: Cascade)
+  sender    User     @relation("NotificationSent", fields: [senderId], references: [id], onDelete: Cascade)
+  blog      Blog?    @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId])
+  @@index([senderId])
+  @@index([blogId])
+  @@index([commentId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+model WebPushSubscription {
+  id       String @id @default(cuid())
+  endpoint String @unique
+  p256dh   String
+  auth     String
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  enabled Boolean @default(true)
+
+  newPosts             Boolean @default(true)
+  specialAnnouncements Boolean @default(true)
+
+  // Empty means the subscriber accepts every topic.
+  tags String[] @default([])
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  recipient User @relation("NotificationReceived", fields: [recipientId], references: [id], onDelete: Cascade)
-  sender User @relation("NotificationSent", fields: [senderId], references: [id], onDelete: Cascade)
-
-  blog Blog? @relation( fields: [blogId], references: [id], onDelete: Cascade)
-  comment Comment? @relation( fields: [commentId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@index([enabled])
 }
 
 model BlogView {
-  id String @id @default(cuid())
-  blogId String
-  userId String?
+  id        String   @id @default(cuid())
+  blogId    String
+  userId    String?
   createdAt DateTime @default(now())
 
-  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  blog Blog  @relation(fields: [blogId], references: [id], onDelete: Cascade)
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([blogId])
@@ -201,13 +237,14 @@ enum NotificationType {
   NEW_COMMENT
   COMMENT_REPLY
   NEW_CLAP
-  FOLLOW 
+  FOLLOW
+  NEW_ARTICLE
   SYSTEM_ALERT
 }
 
 enum EntityType {
-  BLOG 
-  COMMENT 
-  USER 
-  SYTEM
+  BLOG
+  COMMENT
+  USER
+  SYSTEM
 }

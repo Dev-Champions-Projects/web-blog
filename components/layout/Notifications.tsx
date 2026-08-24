@@ -1,159 +1,238 @@
 "use client";
 
 import { getNotifications } from "@/actions/notifications/getNotifications";
+
 import {
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from "@/actions/notifications/markAsRead";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import { useSocket } from "@/context/SocketContext";
+
 import { cn } from "@/lib/utils";
-import { Blog, Comment, Notification } from "@prisma/client";
+
+import type { Blog, Comment, Notification } from "@prisma/client";
+
 import { Bell } from "lucide-react";
+
 import moment from "moment";
+
 import { usePathname, useRouter } from "next/navigation";
+
 import { getBlogUrl } from "@/lib/slug";
+
 import { useEffect, useState } from "react";
 
 export type LatestNotification = Notification & {
-  blog: Pick<Blog, "id" | "title"> | null;
+  blog: Pick<Blog, "id" | "title" | "slug"> | null;
+
   comment: Pick<Comment, "id" | "content" | "blogId"> | null;
 };
 
-const Notifications = () => {
+export default function Notifications() {
   const router = useRouter();
+
   const pathname = usePathname();
 
   const [notifications, setNotifications] = useState<LatestNotification[]>([]);
+
   const [unreadCount, setUnreadCount] = useState(0);
+
   const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
+
   const { refetchNotifications, handleRefetchNotifications } = useSocket();
 
   useEffect(() => {
-    const handleFetch = async () => {
+    async function handleFetch() {
       setLoading(true);
+
       setError(null);
 
       try {
-        const res = await getNotifications();
+        const response = await getNotifications();
 
-        if (res.success) {
-          setNotifications(res.success.notifications);
-          setUnreadCount(res.success.unreadNotificationCount);
+        if (response.success) {
+          setNotifications(response.success.notifications);
+
+          setUnreadCount(response.success.unreadNotificationCount);
         }
 
-        if (res.error) {
-          setError(res.error);
+        if (response.error) {
+          setError(response.error);
         }
-      } catch (error) {
-        console.log(error);
-        setError("An error occured!");
+      } catch {
+        setError("Unable to load notifications.");
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    handleFetch();
+    void handleFetch();
   }, [refetchNotifications]);
 
   useEffect(() => {
     const hash = window.location.hash;
-    let timeoutId: ReturnType<typeof setTimeout>;
 
-    if (hash) {
-      timeoutId = setTimeout(() => {
-        const element = document.querySelector(hash);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth" });
-        }
-      }, 0);
+    if (!hash) {
+      return;
     }
 
-    return () => clearTimeout(timeoutId);
+    const timeout = setTimeout(
+      () => {
+        const element = document.querySelector(hash);
+
+        element?.scrollIntoView({
+          behavior: "smooth",
+        });
+      },
+
+      0,
+    );
+
+    return () => clearTimeout(timeout);
   }, [pathname]);
 
-  const handleOpen = async (n: LatestNotification) => {
-    console.log(n.entityType, n.senderId);
-    if (n.entityType === "BLOG" && n.blogId) {
-      const path = getBlogUrl({ id: n.blogId, title: n.blog?.title });
-      router.push(`${path}/#comments`);
+  function getDestination(notification: LatestNotification) {
+    /*
+     * New articles go to the article itself.
+     */
+
+    if (notification.type === "NEW_ARTICLE" && notification.blog) {
+      return getBlogUrl({
+        id: notification.blog.id,
+
+        title: notification.blog.title,
+
+        slug: notification.blog.slug,
+      });
     }
 
-    if (n.entityType === "COMMENT" && n.comment?.blogId) {
-      const path = getBlogUrl({ id: n.comment?.blogId });
-      router.push(`${path}/#${n.comment.id}`);
+    /*
+     * Admin/System alerts can point to
+     * any safe internal Tech Path path.
+     */
+
+    if (notification.type === "SYSTEM_ALERT" && notification.url) {
+      return notification.url;
     }
 
-    if (n.entityType === "USER" && n.senderId) {
-      router.push(`/user/${n.senderId}/1`);
+    if (notification.entityType === "BLOG" && notification.blogId) {
+      const path = getBlogUrl({
+        id: notification.blogId,
+
+        title: notification.blog?.title,
+
+        slug: notification.blog?.slug,
+      });
+
+      return `${path}#comments`;
     }
 
-    await markNotificationAsRead(n.id);
+    if (notification.entityType === "COMMENT" && notification.comment?.blogId) {
+      const path = getBlogUrl({
+        id: notification.comment.blogId,
+      });
+
+      return `${path}#${notification.comment.id}`;
+    }
+
+    if (notification.entityType === "USER" && notification.senderId) {
+      return `/user/${notification.senderId}/1`;
+    }
+
+    if (notification.url) {
+      return notification.url;
+    }
+
+    return null;
+  }
+
+  async function handleOpen(notification: LatestNotification) {
+    const destination = getDestination(notification);
+
+    await markNotificationAsRead(notification.id);
+
     handleRefetchNotifications();
-  };
 
-  const markAllAsRead = async () => {
+    if (destination) {
+      router.push(destination);
+    }
+  }
+
+  async function markAllAsRead() {
     await markAllNotificationsAsRead();
+
     handleRefetchNotifications();
-  };
+  }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="relative">
-        {!!unreadCount && (
-          <div className="absolute bg-rose-500 h-6 w-6 rounded-full text-sm flex items-center justify-center bottom-2 left-2">
-            <span>{unreadCount}</span>
+        {unreadCount > 0 && (
+          <div className="absolute bottom-2 left-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-rose-500 px-1 text-xs font-bold text-white">
+            {unreadCount > 99 ? "99+" : unreadCount}
           </div>
         )}
+
         <Bell size={20} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[100%] max-w-[400px]">
-        <div className="flex gap-4 justify-between mb-2 p-2">
-          <h3 className="font-bold text-lg">Notifications</h3>
-          <button onClick={markAllAsRead}>Mark all as read</button>
+
+      <DropdownMenuContent className="max-h-[70vh] w-[calc(100vw-2rem)] max-w-[400px] overflow-y-auto">
+        <div className="mb-2 flex items-center justify-between gap-4 p-2">
+          <h3 className="text-lg font-bold">Notifications</h3>
+
+          {notifications.length > 0 && (
+            <button
+              type="button"
+              onClick={markAllAsRead}
+              className="text-xs font-semibold text-[#5A1C4B]"
+            >
+              Mark all as read
+            </button>
+          )}
         </div>
 
-        {loading && (
-          <DropdownMenuItem>
-            <div className="text-sm text-gray-500">Loading...</div>
-          </DropdownMenuItem>
-        )}
+        {loading && <DropdownMenuItem>Loading...</DropdownMenuItem>}
 
         {error && (
-          <DropdownMenuItem>
-            <div className="text-sm text-rose-500">{error}</div>
-          </DropdownMenuItem>
+          <DropdownMenuItem className="text-rose-500">{error}</DropdownMenuItem>
+        )}
+
+        {!loading && !error && notifications.length === 0 && (
+          <div className="p-5 text-center text-sm text-gray-500">
+            No notifications yet.
+          </div>
         )}
 
         {!loading &&
           !error &&
-          !!notifications.length &&
-          notifications.map((n) => {
-            return (
-              <DropdownMenuItem
-                onClick={() => handleOpen(n)}
-                key={n.id}
-                className={cn(
-                  "text-sm cursor-pointer mb-4 flex flex-col items-start border",
-                  !n.isRead && "bg-secondary",
-                )}
-              >
-                <div>{n.content}</div>
-                <span className="text-xs">
-                  {moment(new Date(n.createdAt)).fromNow()}
-                </span>
-              </DropdownMenuItem>
-            );
-          })}
+          notifications.map((notification) => (
+            <DropdownMenuItem
+              key={notification.id}
+              onClick={() => void handleOpen(notification)}
+              className={cn(
+                "mb-2 flex cursor-pointer flex-col items-start rounded-xl border p-3 text-sm",
+
+                !notification.isRead && "bg-secondary",
+              )}
+            >
+              <div>{notification.content}</div>
+
+              <span className="mt-1 text-xs text-gray-500">
+                {moment(new Date(notification.createdAt)).fromNow()}
+              </span>
+            </DropdownMenuItem>
+          ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
-};
-
-export default Notifications;
+}
