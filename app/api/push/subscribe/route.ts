@@ -11,6 +11,10 @@ import {
     db,
 } from "@/lib/db";
 
+import {
+    isAllowedRequestOrigin,
+} from "@/lib/requestOrigin";
+
 
 type SubscriptionBody = {
     endpoint?: unknown;
@@ -23,41 +27,16 @@ type SubscriptionBody = {
 };
 
 
-function isSameOrigin(
-    request: NextRequest,
-) {
-    const origin =
-        request.headers.get(
-            "origin",
-        );
-
-
-    if (!origin) {
-        return false;
-    }
-
-
-    try {
-        return (
-            new URL(
-                origin,
-            ).origin ===
-            request.nextUrl.origin
-        );
-    } catch {
-        return false;
-    }
-}
-
-
 function validateSubscription(
     body: SubscriptionBody,
 ) {
     if (
         typeof body.endpoint !==
         "string" ||
-        body.endpoint.length === 0 ||
-        body.endpoint.length > 4096
+        body.endpoint.length ===
+        0 ||
+        body.endpoint.length >
+        4096
     ) {
         return null;
     }
@@ -84,18 +63,21 @@ function validateSubscription(
     const p256dh =
         body.keys?.p256dh;
 
-
     const authKey =
         body.keys?.auth;
 
 
     if (
-        typeof p256dh !== "string" ||
-        typeof authKey !== "string" ||
+        typeof p256dh !==
+        "string" ||
+        typeof authKey !==
+        "string" ||
         !p256dh ||
         !authKey ||
-        p256dh.length > 2048 ||
-        authKey.length > 2048
+        p256dh.length >
+        2048 ||
+        authKey.length >
+        2048
     ) {
         return null;
     }
@@ -118,7 +100,7 @@ export async function POST(
 ) {
     try {
         if (
-            !isSameOrigin(
+            !isAllowedRequestOrigin(
                 request,
             )
         ) {
@@ -127,7 +109,6 @@ export async function POST(
                     error:
                         "Invalid request origin.",
                 },
-
                 {
                     status: 403,
                 },
@@ -136,7 +117,7 @@ export async function POST(
 
 
         const body =
-            await request.json() as
+            (await request.json()) as
             SubscriptionBody;
 
 
@@ -154,7 +135,6 @@ export async function POST(
                     error:
                         "Invalid push subscription.",
                 },
-
                 {
                     status: 400,
                 },
@@ -163,19 +143,33 @@ export async function POST(
 
 
         /*
-         * Login is optional.
+         * Authentication is optional.
          *
-         * Anonymous readers should still be
-         * able to follow the Tech Path blog.
+         * Anonymous Tech Path readers can
+         * subscribe to browser notifications.
          */
-
-        const session =
-            await auth();
-
-
-        const userId =
-            session?.user?.userId ||
+        let userId:
+            string | null =
             null;
+
+
+        try {
+            const session =
+                await auth();
+
+
+            userId =
+                session?.user
+                    ?.userId ||
+                null;
+        } catch {
+            /*
+             * A missing/expired login should
+             * never prevent Web Push.
+             */
+            userId =
+                null;
+        }
 
 
         await db
@@ -218,7 +212,8 @@ export async function POST(
 
 
         return NextResponse.json({
-            success: true,
+            subscribed:
+                true,
         });
     } catch (error) {
         console.error(
@@ -232,7 +227,6 @@ export async function POST(
                 error:
                     "Unable to enable notifications.",
             },
-
             {
                 status: 500,
             },
@@ -246,7 +240,7 @@ export async function DELETE(
 ) {
     try {
         if (
-            !isSameOrigin(
+            !isAllowedRequestOrigin(
                 request,
             )
         ) {
@@ -255,7 +249,6 @@ export async function DELETE(
                     error:
                         "Invalid request origin.",
                 },
-
                 {
                     status: 403,
                 },
@@ -264,7 +257,9 @@ export async function DELETE(
 
 
         const body =
-            await request.json();
+            (await request.json()) as {
+                endpoint?: unknown;
+            };
 
 
         const endpoint =
@@ -274,13 +269,16 @@ export async function DELETE(
                 : "";
 
 
-        if (!endpoint) {
+        if (
+            !endpoint ||
+            endpoint.length >
+            4096
+        ) {
             return NextResponse.json(
                 {
                     error:
-                        "Subscription endpoint is required.",
+                        "Invalid push subscription.",
                 },
-
                 {
                     status: 400,
                 },
@@ -298,7 +296,8 @@ export async function DELETE(
 
 
         return NextResponse.json({
-            success: true,
+            subscribed:
+                false,
         });
     } catch (error) {
         console.error(
@@ -312,7 +311,6 @@ export async function DELETE(
                 error:
                     "Unable to disable notifications.",
             },
-
             {
                 status: 500,
             },

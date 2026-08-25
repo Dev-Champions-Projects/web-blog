@@ -1,5 +1,3 @@
-import { siteConfig } from "@/lib/seo";
-
 import {
     NextRequest,
     NextResponse,
@@ -17,10 +15,13 @@ import {
     sendTechPathAnnouncement,
 } from "@/lib/blogPushNotifications";
 
+import {
+    isAllowedRequestOrigin,
+} from "@/lib/requestOrigin";
+
 
 function cleanString(
-    value:
-        unknown,
+    value: unknown,
 ) {
     return typeof value ===
         "string"
@@ -30,125 +31,25 @@ function cleanString(
 
 
 function validDestination(
-    value:
-        string,
+    value: string,
 ) {
     return (
-        value.startsWith(
-            "/",
-        ) &&
-        !value.startsWith(
-            "//",
-        )
+        value.startsWith("/") &&
+        !value.startsWith("//")
     );
 }
 
-function getAllowedOrigins(
-    request: NextRequest,
-) {
-    const origins =
-        new Set<string>();
-
-    /*
-     * Canonical production origin.
-     */
-    origins.add(
-        new URL(
-            siteConfig.url,
-        ).origin,
-    );
-
-    /*
-     * Next.js-resolved origin.
-     * Useful locally and when there is
-     * no reverse proxy.
-     */
-    origins.add(
-        request.nextUrl.origin,
-    );
-
-    /*
-     * Reverse proxies such as Render
-     * usually forward the original host
-     * and protocol.
-     */
-    const forwardedHost =
-        request.headers
-            .get("x-forwarded-host")
-            ?.split(",")[0]
-            ?.trim();
-
-    const forwardedProto =
-        request.headers
-            .get("x-forwarded-proto")
-            ?.split(",")[0]
-            ?.trim();
-
-    if (
-        forwardedHost &&
-        forwardedProto
-    ) {
-        origins.add(
-            `${forwardedProto}://${forwardedHost}`,
-        );
-    }
-
-    /*
-     * Local development.
-     */
-    if (
-        process.env.NODE_ENV !==
-        "production"
-    ) {
-        origins.add(
-            "http://localhost:3000",
-        );
-
-        origins.add(
-            "http://127.0.0.1:3000",
-        );
-    }
-
-    return origins;
-}
-
-
-function hasValidRequestOrigin(
-    request: NextRequest,
-) {
-    const origin =
-        request.headers.get(
-            "origin",
-        );
-
-    /*
-     * Requests without an Origin header
-     * are not rejected here. Authentication
-     * and ADMIN authorization still apply.
-     */
-    if (!origin) {
-        return true;
-    }
-
-    try {
-        const normalizedOrigin =
-            new URL(origin).origin;
-
-        return getAllowedOrigins(
-            request,
-        ).has(
-            normalizedOrigin,
-        );
-    } catch {
-        return false;
-    }
-}
 
 export async function POST(
-    request:
-        NextRequest,
+    request: NextRequest,
 ) {
     try {
+        /*
+         * ========================================
+         * AUTHORIZATION
+         * ========================================
+         */
+
         const session =
             await auth();
 
@@ -164,17 +65,21 @@ export async function POST(
                     error:
                         "Access denied.",
                 },
-
                 {
-                    status:
-                        403,
+                    status: 403,
                 },
             );
         }
 
 
+        /*
+         * ========================================
+         * ORIGIN PROTECTION
+         * ========================================
+         */
+
         if (
-            !hasValidRequestOrigin(
+            !isAllowedRequestOrigin(
                 request,
             )
         ) {
@@ -190,25 +95,11 @@ export async function POST(
         }
 
 
-        if (
-            origin &&
-            origin !==
-            request.nextUrl
-                .origin
-        ) {
-            return NextResponse.json(
-                {
-                    error:
-                        "Invalid request origin.",
-                },
-
-                {
-                    status:
-                        403,
-                },
-            );
-        }
-
+        /*
+         * ========================================
+         * REQUEST BODY
+         * ========================================
+         */
 
         const body =
             await request.json();
@@ -239,20 +130,23 @@ export async function POST(
             );
 
 
+        /*
+         * ========================================
+         * VALIDATION
+         * ========================================
+         */
+
         if (
             !title ||
-            title.length >
-            80
+            title.length > 80
         ) {
             return NextResponse.json(
                 {
                     error:
                         "Title must contain 1–80 characters.",
                 },
-
                 {
-                    status:
-                        400,
+                    status: 400,
                 },
             );
         }
@@ -260,18 +154,15 @@ export async function POST(
 
         if (
             !message ||
-            message.length >
-            240
+            message.length > 240
         ) {
             return NextResponse.json(
                 {
                     error:
                         "Message must contain 1–240 characters.",
                 },
-
                 {
-                    status:
-                        400,
+                    status: 400,
                 },
             );
         }
@@ -287,10 +178,8 @@ export async function POST(
                     error:
                         "Destination must be an internal Tech Path path.",
                 },
-
                 {
-                    status:
-                        400,
+                    status: 400,
                 },
             );
         }
@@ -298,11 +187,8 @@ export async function POST(
 
         const validTags =
             availableTags.filter(
-                (
-                    tag,
-                ) =>
-                    tag !==
-                    "All",
+                (tag) =>
+                    tag !== "All",
             );
 
 
@@ -317,20 +203,23 @@ export async function POST(
                     error:
                         "Invalid topic audience.",
                 },
-
                 {
-                    status:
-                        400,
+                    status: 400,
                 },
             );
         }
 
 
+        /*
+         * ========================================
+         * SEND
+         * ========================================
+         */
+
         const result =
             await sendTechPathAnnouncement({
                 senderId:
-                    session.user
-                        .userId,
+                    session.user.userId,
 
                 title,
 
@@ -339,21 +228,17 @@ export async function POST(
                 url,
 
                 targetTag:
-                    targetTag ||
-                    null,
+                    targetTag || null,
             });
 
 
         return NextResponse.json({
-            success:
-                true,
+            success: true,
 
             delivery:
                 result,
         });
-    } catch (
-    error
-    ) {
+    } catch (error) {
         console.error(
             "Unable to send Tech Path announcement:",
             error,
@@ -365,10 +250,8 @@ export async function POST(
                 error:
                     "Unable to send notification.",
             },
-
             {
-                status:
-                    500,
+                status: 500,
             },
         );
     }
