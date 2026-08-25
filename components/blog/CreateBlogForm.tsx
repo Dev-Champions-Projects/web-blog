@@ -9,7 +9,7 @@ import AddCover from "./AddCover";
 import { useEffect, useState, useTransition } from "react";
 import CoverImage from "./CoverImage";
 import { tags } from "@/lib/tags";
-import BlockNoteEditor from "./editor/BlockNoteEditor";
+// import BlockNoteEditor from "./editor/BlockNoteEditor";
 import Button from "../common/Button";
 import Alert from "../common/Alert";
 import { createBlog } from "@/actions/blogs/create-blog";
@@ -18,6 +18,7 @@ import { editBlog } from "@/actions/blogs/edit-blog";
 import { useEdgeStore } from "@/lib/edgestore";
 import { deleteBlog } from "@/actions/blogs/delete-blog";
 import { useRouter } from "next/navigation";
+import BlockNoteEditor from "./editor/BlockNoteEditorClient";
 
 const CreateBlogForm = ({ blog }: { blog?: Blog }) => {
   const session = useSession();

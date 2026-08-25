@@ -1,40 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model User {
-  id                    String         @id @default(cuid())
+  id                    String                @id @default(cuid())
   name                  String?
-  email                 String         @unique
+  email                 String                @unique
   password              String?
   emailVerified         DateTime?
   image                 String?
   bio                   String?
   tags                  String[]
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  role                  UserRole              @default(USER)
   accounts              Account[]
   blogs                 Blog[]
   blogViews             BlogView[]
-  claps                 Clap[]
-  followers             Follow[]       @relation("UserAsFollowed") // those who follow this user
-  followings            Follow[]       @relation("UserAsFollower") // those followed by this user
-  commentClaps          CommentClap[]
   bookmarks             Bookmark[]
+  claps                 Clap[]
+  repliedToComments     Comment[]             @relation("ReplyToUser")
   comments              Comment[]
-  repliedToComments     Comment[]      @relation("ReplyToUser")
-  receivedNotifications Notification[] @relation("NotificationReceived")
-  sentNotifications     Notification[] @relation("NotificationSent")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  role UserRole @default(USER)
-
-  webPushSubscriptions WebPushSubscription[]
+  commentClaps          CommentClap[]
+  followings            Follow[]              @relation("UserAsFollower")
+  followers             Follow[]              @relation("UserAsFollowed")
+  receivedNotifications Notification[]        @relation("NotificationReceived")
+  sentNotifications     Notification[]        @relation("NotificationSent")
+  webPushSubscriptions  WebPushSubscription[]
 }
 
 model Account {
@@ -49,23 +46,20 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([provider, providerAccountId])
 }
 
 model Follow {
   id          String   @id @default(cuid())
-  followerId  String //user who follows
-  followingId String //user being followed
+  followerId  String
+  followingId String
   createAt    DateTime @default(now())
-
-  follower  User @relation("UserAsFollower", fields: [followerId], references: [id], onDelete: Cascade) // the one following
-  following User @relation("UserAsFollowed", fields: [followingId], references: [id], onDelete: Cascade) // the one followed
+  follower    User     @relation("UserAsFollower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("UserAsFollowed", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@unique([followerId, followingId])
 }
@@ -88,32 +82,25 @@ model PasswordResetToken {
   @@unique([email, token])
 }
 
-enum UserRole {
-  ADMIN
-  USER
-}
-
 model Blog {
-  id          String    @id @default(cuid())
-  userId      String
-  title       String
-  content     String
-  slug        String?   @unique
-  coverImage  String?
-  youtubeUrl  String?
-  isPublished Boolean   @default(false)
-  views       Int       @default(0)
-  createdAt   DateTime  @default(now())
-  publishedAt DateTime?
-  tags        String[]
-
-  claps         Clap[]
-  bookmarks     Bookmark[]
+  id            String         @id @default(cuid())
+  userId        String
+  title         String
+  content       String
+  coverImage    String?
+  isPublished   Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  tags          String[]
+  views         Int            @default(0)
+  slug          String?        @unique
+  youtubeUrl    String?
+  publishedAt   DateTime?
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   blogViews     BlogView[]
+  bookmarks     Bookmark[]
+  claps         Clap[]
   comments      Comment[]
   notifications Notification[]
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Clap {
@@ -121,9 +108,8 @@ model Clap {
   userId    String
   blogId    String
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, blogId])
 }
@@ -133,9 +119,8 @@ model Bookmark {
   userId    String
   blogId    String
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, blogId])
 }
@@ -148,14 +133,13 @@ model Comment {
   repliedToUserId String?
   content         String
   createdAt       DateTime       @default(now())
+  blog            Blog           @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  parent          Comment?       @relation("OneLevelThread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies         Comment[]      @relation("OneLevelThread")
+  repliedToUser   User?          @relation("ReplyToUser", fields: [repliedToUserId], references: [id])
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   claps           CommentClap[]
   notification    Notification[]
-
-  blog          Blog      @relation(fields: [blogId], references: [id], onDelete: Cascade)
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  parent        Comment?  @relation("OneLevelThread", fields: [parentId], references: [id], onDelete: Cascade)
-  replies       Comment[] @relation("OneLevelThread")
-  repliedToUser User?     @relation("ReplyToUser", fields: [repliedToUserId], references: [id])
 }
 
 model CommentClap {
@@ -163,9 +147,8 @@ model CommentClap {
   userId    String
   commentId String
   createdAt DateTime @default(now())
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, commentId])
 }
@@ -179,42 +162,28 @@ model Notification {
   commentId   String?
   entityType  EntityType?
   content     String?
-  url         String?
   isRead      Boolean          @default(false)
   createdAt   DateTime         @default(now())
-
-  recipient User     @relation("NotificationReceived", fields: [recipientId], references: [id], onDelete: Cascade)
-  sender    User     @relation("NotificationSent", fields: [senderId], references: [id], onDelete: Cascade)
-  blog      Blog?    @relation(fields: [blogId], references: [id], onDelete: Cascade)
-  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
-
-  @@index([recipientId])
-  @@index([senderId])
-  @@index([blogId])
-  @@index([commentId])
-  @@index([isRead])
-  @@index([createdAt])
+  url         String?
+  blog        Blog?            @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  comment     Comment?         @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  recipient   User             @relation("NotificationReceived", fields: [recipientId], references: [id], onDelete: Cascade)
+  sender      User             @relation("NotificationSent", fields: [senderId], references: [id], onDelete: Cascade)
 }
 
 model WebPushSubscription {
-  id       String @id @default(cuid())
-  endpoint String @unique
-  p256dh   String
-  auth     String
-
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  enabled Boolean @default(true)
-
-  newPosts             Boolean @default(true)
-  specialAnnouncements Boolean @default(true)
-
-  // Empty means the subscriber accepts every topic.
-  tags String[] @default([])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                   String   @id @default(cuid())
+  endpoint             String   @unique
+  p256dh               String
+  auth                 String
+  userId               String?
+  enabled              Boolean  @default(true)
+  newPosts             Boolean  @default(true)
+  specialAnnouncements Boolean  @default(true)
+  tags                 String[] @default([])
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  user                 User?    @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([enabled])
@@ -225,12 +194,16 @@ model BlogView {
   blogId    String
   userId    String?
   createdAt DateTime @default(now())
-
-  blog Blog  @relation(fields: [blogId], references: [id], onDelete: Cascade)
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([blogId])
   @@index([userId])
+}
+
+enum UserRole {
+  ADMIN
+  USER
 }
 
 enum NotificationType {
@@ -238,13 +211,13 @@ enum NotificationType {
   COMMENT_REPLY
   NEW_CLAP
   FOLLOW
-  NEW_ARTICLE
   SYSTEM_ALERT
+  NEW_ARTICLE
 }
 
 enum EntityType {
   BLOG
   COMMENT
   USER
-  SYSTEM
+  SYTEM
 }
