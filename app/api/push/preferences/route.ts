@@ -4,6 +4,10 @@ import {
 } from "next/server";
 
 import {
+    isAllowedRequestOrigin,
+} from "@/lib/requestOrigin";
+
+import {
     db,
 } from "@/lib/db";
 
@@ -14,47 +18,13 @@ import {
 
 const validTags =
     availableTags.filter(
-        (
-            tag,
-        ) =>
-            tag !==
-            "All",
+        (tag) =>
+            tag !== "All",
     );
 
 
-function sameOrigin(
-    request:
-        NextRequest,
-) {
-    const origin =
-        request.headers.get(
-            "origin",
-        );
-
-
-    if (
-        !origin
-    ) {
-        return false;
-    }
-
-
-    try {
-        return (
-            new URL(
-                origin,
-            ).origin ===
-            request.nextUrl.origin
-        );
-    } catch {
-        return false;
-    }
-}
-
-
 function cleanTags(
-    value:
-        unknown,
+    value: unknown,
 ) {
     if (
         !Array.isArray(
@@ -68,12 +38,10 @@ function cleanTags(
     const canonical =
         new Map(
             validTags.map(
-                (
+                (tag) => [
+                    tag.toLowerCase(),
                     tag,
-                ) => [
-                        tag.toLowerCase(),
-                        tag,
-                    ],
+                ],
             ),
         );
 
@@ -84,15 +52,12 @@ function cleanTags(
                 .filter(
                     (
                         item,
-                    ):
-                        item is string =>
+                    ): item is string =>
                         typeof item ===
                         "string",
                 )
                 .map(
-                    (
-                        item,
-                    ) =>
+                    (item) =>
                         canonical.get(
                             item
                                 .trim()
@@ -102,11 +67,8 @@ function cleanTags(
                 .filter(
                     (
                         item,
-                    ):
-                        item is string =>
-                        Boolean(
-                            item,
-                        ),
+                    ): item is string =>
+                        Boolean(item),
                 ),
         ),
     ).slice(
@@ -123,12 +85,11 @@ function cleanTags(
  */
 
 export async function POST(
-    request:
-        NextRequest,
+    request: NextRequest,
 ) {
     try {
         if (
-            !sameOrigin(
+            !isAllowedRequestOrigin(
                 request,
             )
         ) {
@@ -137,10 +98,8 @@ export async function POST(
                     error:
                         "Invalid request origin.",
                 },
-
                 {
-                    status:
-                        403,
+                    status: 403,
                 },
             );
         }
@@ -151,25 +110,20 @@ export async function POST(
 
 
         const endpoint =
-            typeof body
-                .endpoint ===
+            typeof body.endpoint ===
                 "string"
                 ? body.endpoint
                 : "";
 
 
-        if (
-            !endpoint
-        ) {
+        if (!endpoint) {
             return NextResponse.json(
                 {
                     error:
                         "Push endpoint is required.",
                 },
-
                 {
-                    status:
-                        400,
+                    status: 400,
                 },
             );
         }
@@ -204,10 +158,8 @@ export async function POST(
                     error:
                         "Push subscription not found.",
                 },
-
                 {
-                    status:
-                        404,
+                    status: 404,
                 },
             );
         }
@@ -217,9 +169,7 @@ export async function POST(
             preferences:
                 subscription,
         });
-    } catch (
-    error
-    ) {
+    } catch (error) {
         console.error(
             "Unable to load Tech Path push preferences:",
             error,
@@ -231,10 +181,8 @@ export async function POST(
                 error:
                     "Unable to load alert preferences.",
             },
-
             {
-                status:
-                    500,
+                status: 500,
             },
         );
     }
@@ -248,12 +196,11 @@ export async function POST(
  */
 
 export async function PATCH(
-    request:
-        NextRequest,
+    request: NextRequest,
 ) {
     try {
         if (
-            !sameOrigin(
+            !isAllowedRequestOrigin(
                 request,
             )
         ) {
@@ -262,10 +209,8 @@ export async function PATCH(
                     error:
                         "Invalid request origin.",
                 },
-
                 {
-                    status:
-                        403,
+                    status: 403,
                 },
             );
         }
@@ -276,25 +221,47 @@ export async function PATCH(
 
 
         const endpoint =
-            typeof body
-                .endpoint ===
+            typeof body.endpoint ===
                 "string"
                 ? body.endpoint
                 : "";
 
 
-        if (
-            !endpoint
-        ) {
+        if (!endpoint) {
             return NextResponse.json(
                 {
                     error:
                         "Push endpoint is required.",
                 },
-
                 {
-                    status:
-                        400,
+                    status: 400,
+                },
+            );
+        }
+
+
+        const existing =
+            await db
+                .webPushSubscription
+                .findUnique({
+                    where: {
+                        endpoint,
+                    },
+
+                    select: {
+                        id: true,
+                    },
+                });
+
+
+        if (!existing) {
+            return NextResponse.json(
+                {
+                    error:
+                        "Push subscription not found.",
+                },
+                {
+                    status: 404,
                 },
             );
         }
@@ -337,15 +304,12 @@ export async function PATCH(
 
 
         return NextResponse.json({
-            success:
-                true,
+            success: true,
 
             preferences:
                 updated,
         });
-    } catch (
-    error
-    ) {
+    } catch (error) {
         console.error(
             "Unable to save Tech Path alert preferences:",
             error,
@@ -357,10 +321,8 @@ export async function PATCH(
                 error:
                     "Unable to save alert preferences.",
             },
-
             {
-                status:
-                    500,
+                status: 500,
             },
         );
     }

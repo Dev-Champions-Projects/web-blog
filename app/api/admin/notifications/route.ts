@@ -15,10 +15,13 @@ import {
     sendTechPathAnnouncement,
 } from "@/lib/blogPushNotifications";
 
+import {
+    isAllowedRequestOrigin,
+} from "@/lib/requestOrigin";
+
 
 function cleanString(
-    value:
-        unknown,
+    value: unknown,
 ) {
     return typeof value ===
         "string"
@@ -28,25 +31,25 @@ function cleanString(
 
 
 function validDestination(
-    value:
-        string,
+    value: string,
 ) {
     return (
-        value.startsWith(
-            "/",
-        ) &&
-        !value.startsWith(
-            "//",
-        )
+        value.startsWith("/") &&
+        !value.startsWith("//")
     );
 }
 
 
 export async function POST(
-    request:
-        NextRequest,
+    request: NextRequest,
 ) {
     try {
+        /*
+         * ========================================
+         * AUTHORIZATION
+         * ========================================
+         */
+
         const session =
             await auth();
 
@@ -62,40 +65,41 @@ export async function POST(
                     error:
                         "Access denied.",
                 },
-
                 {
-                    status:
-                        403,
+                    status: 403,
                 },
             );
         }
 
 
-        const origin =
-            request.headers.get(
-                "origin",
-            );
-
+        /*
+         * ========================================
+         * ORIGIN PROTECTION
+         * ========================================
+         */
 
         if (
-            origin &&
-            origin !==
-            request.nextUrl
-                .origin
+            !isAllowedRequestOrigin(
+                request,
+            )
         ) {
             return NextResponse.json(
                 {
                     error:
                         "Invalid request origin.",
                 },
-
                 {
-                    status:
-                        403,
+                    status: 403,
                 },
             );
         }
 
+
+        /*
+         * ========================================
+         * REQUEST BODY
+         * ========================================
+         */
 
         const body =
             await request.json();
@@ -126,20 +130,23 @@ export async function POST(
             );
 
 
+        /*
+         * ========================================
+         * VALIDATION
+         * ========================================
+         */
+
         if (
             !title ||
-            title.length >
-            80
+            title.length > 80
         ) {
             return NextResponse.json(
                 {
                     error:
                         "Title must contain 1–80 characters.",
                 },
-
                 {
-                    status:
-                        400,
+                    status: 400,
                 },
             );
         }
@@ -147,18 +154,15 @@ export async function POST(
 
         if (
             !message ||
-            message.length >
-            240
+            message.length > 240
         ) {
             return NextResponse.json(
                 {
                     error:
                         "Message must contain 1–240 characters.",
                 },
-
                 {
-                    status:
-                        400,
+                    status: 400,
                 },
             );
         }
@@ -174,10 +178,8 @@ export async function POST(
                     error:
                         "Destination must be an internal Tech Path path.",
                 },
-
                 {
-                    status:
-                        400,
+                    status: 400,
                 },
             );
         }
@@ -185,11 +187,8 @@ export async function POST(
 
         const validTags =
             availableTags.filter(
-                (
-                    tag,
-                ) =>
-                    tag !==
-                    "All",
+                (tag) =>
+                    tag !== "All",
             );
 
 
@@ -204,20 +203,23 @@ export async function POST(
                     error:
                         "Invalid topic audience.",
                 },
-
                 {
-                    status:
-                        400,
+                    status: 400,
                 },
             );
         }
 
 
+        /*
+         * ========================================
+         * SEND
+         * ========================================
+         */
+
         const result =
             await sendTechPathAnnouncement({
                 senderId:
-                    session.user
-                        .userId,
+                    session.user.userId,
 
                 title,
 
@@ -226,21 +228,17 @@ export async function POST(
                 url,
 
                 targetTag:
-                    targetTag ||
-                    null,
+                    targetTag || null,
             });
 
 
         return NextResponse.json({
-            success:
-                true,
+            success: true,
 
             delivery:
                 result,
         });
-    } catch (
-    error
-    ) {
+    } catch (error) {
         console.error(
             "Unable to send Tech Path announcement:",
             error,
@@ -252,10 +250,8 @@ export async function POST(
                 error:
                     "Unable to send notification.",
             },
-
             {
-                status:
-                    500,
+                status: 500,
             },
         );
     }
