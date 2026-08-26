@@ -1,56 +1,136 @@
-import type { MetadataRoute } from "next";
+import type {
+    MetadataRoute,
+} from "next";
 
-import { db } from "@/lib/db";
-import { siteConfig } from "@/lib/seo";
-import { getBlogUrl } from "@/lib/slug";
+import {
+    BlogApprovalStatus,
+} from "@prisma/client";
 
-export const dynamic = "force-dynamic";
+import {
+    db,
+} from "@/lib/db";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const staticUrls: MetadataRoute.Sitemap = [
-        {
-            url: `${siteConfig.url}/blog/feed/1`,
-            changeFrequency: "daily",
-            priority: 1,
-        },
-        {
-            url: `${siteConfig.url}/privacy`,
-            changeFrequency: "yearly",
-            priority: 0.3,
-        },
-        {
-            url: `${siteConfig.url}/terms`,
-            changeFrequency: "yearly",
-            priority: 0.3,
-        },
-    ];
+import {
+    siteConfig,
+} from "@/lib/seo";
+
+import {
+    getBlogUrl,
+} from "@/lib/slug";
+
+
+export const dynamic =
+    "force-dynamic";
+
+
+export default async function sitemap():
+    Promise<MetadataRoute.Sitemap> {
+    const staticUrls:
+        MetadataRoute.Sitemap = [
+            {
+                url:
+                    `${siteConfig.url}/blog/feed/1`,
+
+                changeFrequency:
+                    "daily",
+
+                priority:
+                    1,
+            },
+
+            {
+                url:
+                    `${siteConfig.url}/privacy`,
+
+                changeFrequency:
+                    "yearly",
+
+                priority:
+                    0.3,
+            },
+
+            {
+                url:
+                    `${siteConfig.url}/terms`,
+
+                changeFrequency:
+                    "yearly",
+
+                priority:
+                    0.3,
+            },
+        ];
+
 
     try {
-        const blogs = await db.blog.findMany({
-            where: {
-                isPublished: true,
-            },
-            select: {
-                id: true,
-                title: true,
-                slug: true,
-                createdAt: true,
-            },
-            orderBy: {
-                createdAt: "desc",
-            },
-        });
+        const blogs =
+            await db.blog.findMany({
+                where: {
+                    isPublished:
+                        true,
 
-        const blogUrls: MetadataRoute.Sitemap = blogs.map((blog) => ({
-            url: `${siteConfig.url}${getBlogUrl(blog)}`,
-            lastModified: blog.createdAt,
-            changeFrequency: "weekly" as const,
-            priority: 0.8,
-        }));
+                    approvalStatus:
+                        BlogApprovalStatus.APPROVED,
+                },
 
-        return [...staticUrls, ...blogUrls];
-    } catch (error) {
-        console.error("Tech Path sitemap generation failed:", error);
+                select: {
+                    id:
+                        true,
+
+                    title:
+                        true,
+
+                    slug:
+                        true,
+
+                    createdAt:
+                        true,
+
+                    publishedAt:
+                        true,
+                },
+
+                orderBy: {
+                    createdAt:
+                        "desc",
+                },
+            });
+
+
+        const blogUrls:
+            MetadataRoute.Sitemap =
+            blogs.map(
+                (
+                    blog,
+                ) => ({
+                    url:
+                        `${siteConfig.url}${getBlogUrl(blog)}`,
+
+                    lastModified:
+                        blog.publishedAt ??
+                        blog.createdAt,
+
+                    changeFrequency:
+                        "weekly" as const,
+
+                    priority:
+                        0.8,
+                }),
+            );
+
+
+        return [
+            ...staticUrls,
+            ...blogUrls,
+        ];
+    } catch (
+    error
+    ) {
+        console.error(
+            "Tech Path sitemap generation failed:",
+            error,
+        );
+
 
         return staticUrls;
     }

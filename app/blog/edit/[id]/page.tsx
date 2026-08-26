@@ -1,26 +1,71 @@
+import { auth } from "@/auth";
+
 import { getBlogById } from "@/actions/blogs/getblogbyid";
+
 import CreateBlogForm from "@/components/blog/CreateBlogForm";
+
 import Alert from "@/components/common/Alert";
+
 import Container from "@/components/layout/Container";
 
 interface BlogEditProps {
-    params: Promise<{ id: string }>
+  params: Promise<{
+    id: string;
+  }>;
 }
 
 const BlogEdit = async ({ params }: BlogEditProps) => {
-    const { id } = await params
+  const session = await auth();
 
-    const res = await getBlogById({ blogId: id })
+  if (!session?.user) {
+    return (
+      <Container>
+        <Alert error message="Please sign in to edit an article." />
+      </Container>
+    );
+  }
 
-    if (!res.success) return <Alert error message="Error getting blog" />
+  const { id } = await params;
 
-    const blog = res.success.blog
+  const res = await getBlogById({
+    blogId: id,
+  });
 
-    if (!blog) return <Alert error message="No blog" />
+  if (!res.success) {
+    return (
+      <Container>
+        <Alert error message={res.error ?? "Error getting blog"} />
+      </Container>
+    );
+  }
 
-    return (<Container>
-        <CreateBlogForm blog={blog} />
-    </Container>);
-}
+  const blog = res.success.blog;
+
+  if (!blog) {
+    return (
+      <Container>
+        <Alert error message="No blog" />
+      </Container>
+    );
+  }
+
+  const isAdmin = session.user.role === "ADMIN";
+
+  const ownsBlog = session.user.userId === blog.userId;
+
+  if (!isAdmin && !ownsBlog) {
+    return (
+      <Container>
+        <Alert error message="You are not authorized to edit this article." />
+      </Container>
+    );
+  }
+
+  return (
+    <Container>
+      <CreateBlogForm blog={blog} />
+    </Container>
+  );
+};
 
 export default BlogEdit;

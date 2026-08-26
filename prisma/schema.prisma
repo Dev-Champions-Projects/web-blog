@@ -83,24 +83,35 @@ model PasswordResetToken {
 }
 
 model Blog {
-  id            String         @id @default(cuid())
-  userId        String
-  title         String
-  content       String
-  coverImage    String?
-  isPublished   Boolean        @default(false)
-  createdAt     DateTime       @default(now())
-  tags          String[]
-  views         Int            @default(0)
-  slug          String?        @unique
-  youtubeUrl    String?
-  publishedAt   DateTime?
+  id          String    @id @default(cuid())
+  userId      String
+  title       String
+  content     String
+  coverImage  String?
+  isPublished Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  tags        String[]
+  views       Int       @default(0)
+  slug        String?   @unique
+  youtubeUrl  String?
+  publishedAt DateTime?
+
+  // Editorial approval workflow.
+  //
+  // APPROVED is intentionally the DB default so all existing
+  // published articles remain valid when this column is added.
+  approvalStatus BlogApprovalStatus @default(APPROVED)
+  submittedAt    DateTime?
+
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   blogViews     BlogView[]
   bookmarks     Bookmark[]
   claps         Clap[]
   comments      Comment[]
   notifications Notification[]
+
+  @@index([approvalStatus])
+  @@index([isPublished])
 }
 
 model Clap {
@@ -204,6 +215,13 @@ model BlogView {
 enum UserRole {
   ADMIN
   USER
+}
+
+enum BlogApprovalStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum NotificationType {

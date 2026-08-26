@@ -1,6 +1,19 @@
 "use server";
 
 import {
+  BlogApprovalStatus,
+  Prisma,
+} from "@prisma/client";
+
+import {
+  revalidatePath,
+} from "next/cache";
+
+import {
+  auth,
+} from "@/auth";
+
+import {
   db,
 } from "@/lib/db";
 
@@ -9,17 +22,13 @@ import {
 } from "@/lib/user";
 
 import {
-  BlogSchema,
-  BlogSchemaType,
-} from "@/schemas/BlogSchema";
-
-import {
   slugify,
 } from "@/lib/slug";
 
 import {
-  revalidatePath,
-} from "next/cache";
+  BlogSchema,
+  BlogSchemaType,
+} from "@/schemas/BlogSchema";
 
 import {
   notifyNewBlogSubscribers,
@@ -34,14 +43,28 @@ export const editBlog =
     blogId:
       string,
   ) => {
-    const vFields =
+    const session =
+      await auth();
+
+
+    if (
+      !session?.user?.userId
+    ) {
+      return {
+        error:
+          "Please sign in.",
+      };
+    }
+
+
+    const validated =
       BlogSchema.safeParse(
         values,
       );
 
 
     if (
-      !vFields.success
+      !validated.success
     ) {
       return {
         error:
@@ -50,36 +73,20 @@ export const editBlog =
     }
 
 
-    const {
-      userId,
-      isPublished,
-    } =
-      vFields.data;
+    const currentUserId =
+      session.user.userId;
 
 
-    const user =
+    const currentUser =
       await getUserById(
-        userId,
+        currentUserId,
       );
 
 
-    if (
-      !user
-    ) {
+    if (!currentUser) {
       return {
         error:
           "User does not exist!",
-      };
-    }
-
-
-    if (
-      isPublished &&
-      !user.emailVerified
-    ) {
-      return {
-        error:
-          "Not authorized! Verify your email!",
       };
     }
 
@@ -93,9 +100,7 @@ export const editBlog =
       });
 
 
-    if (
-      !blog
-    ) {
+    if (!blog) {
       return {
         error:
           "Blog not found!",
@@ -103,47 +108,135 @@ export const editBlog =
     }
 
 
+    const isAdmin =
+      currentUser.role ===
+      "ADMIN";
+
+
+    const ownsBlog =
+      blog.userId ===
+      currentUserId;
+
+
     /*
-     * Only the FIRST publication generates
-     * article alerts.
+     * Only the author or an ADMIN can edit.
      */
+    if (
+      !ownsBlog &&
+      !isAdmin
+    ) {
+      return {
+        error:
+          "Not authorized to edit this article.",
+      };
+    }
+
+
+    const wantsPublication =
+      validated.data
+        .isPublished;
+
+
+    if (
+      wantsPublication &&
+      !currentUser.emailVerified
+    ) {
+      return {
+        error:
+          "Verify your email before submitting an article.",
+      };
+    }
+
+
+    const publishImmediately =
+      isAdmin &&
+      wantsPublication;
+
+
+    const submitForReview =
+      !isAdmin &&
+      wantsPublication;
+
+
+    const nextStatus =
+      publishImmediately
+        ? BlogApprovalStatus.APPROVED
+        : submitForReview
+          ? BlogApprovalStatus.PENDING
+          : BlogApprovalStatus.DRAFT;
+
+
+    const now =
+      new Date();
+
 
     const firstPublication =
-      isPublished &&
+      publishImmediately &&
       blog.publishedAt ===
       null;
 
 
     const updateData:
-      any = {
-      ...vFields.data,
+      Prisma.BlogUpdateInput = {
+      title:
+        validated.data
+          .title,
+
+      content:
+        validated.data
+          .content,
+
+      coverImage:
+        validated.data
+          .coverImage ||
+        null,
 
       youtubeUrl:
-        vFields.data
+        validated.data
           .youtubeUrl ||
         null,
+
+      tags:
+        validated.data
+          .tags,
+
+      /*
+       * A normal user can NEVER set this true.
+       */
+      isPublished:
+        publishImmediately,
+
+      approvalStatus:
+        nextStatus,
+
+      submittedAt:
+        submitForReview
+          ? now
+          : blog.submittedAt,
     };
 
 
     if (
       firstPublication
     ) {
-      updateData
-        .publishedAt =
-        new Date();
+      updateData.publishedAt =
+        now;
     }
 
 
+    /*
+     * =========================================
+     * TITLE / SLUG UPDATE
+     * =========================================
+     */
+
     if (
-      vFields.data
-        .title &&
-      vFields.data
-        .title !==
+      validated.data.title !==
       blog.title
     ) {
       const base =
         slugify(
-          vFields.data
+          validated.data
             .title,
         );
 
@@ -155,11 +248,10 @@ export const editBlog =
         undefined;
 
 
-      if (
-        finalSlug
-      ) {
+      if (finalSlug) {
         let candidate =
           finalSlug;
+
 
         let index =
           1;
@@ -180,6 +272,7 @@ export const editBlog =
         ) {
           index +=
             1;
+
 
           candidate =
             `${finalSlug}-${index}`;
@@ -209,14 +302,8 @@ export const editBlog =
 
 
     try {
-      const path =
-        getBlogPath(
-          updated,
-        );
-
-
       revalidatePath(
-        path,
+        "/",
       );
 
       revalidatePath(
@@ -224,45 +311,76 @@ export const editBlog =
       );
 
       revalidatePath(
-        `/user/${userId}/1`,
+        "/admin",
+      );
+
+      revalidatePath(
+        "/dashboard",
+      );
+
+      revalidatePath(
+        `/user/${updated.userId}/1`,
+      );
+
+      revalidatePath(
+        getBlogPath(
+          updated,
+        ),
       );
     } catch {
       // Ignore.
     }
 
 
+    /*
+     * Only first actual publication fires
+     * a new-article alert.
+     */
+
     if (
       firstPublication
     ) {
-      await notifyNewBlogSubscribers({
-        id:
-          updated.id,
+      try {
+        await notifyNewBlogSubscribers({
+          id:
+            updated.id,
 
-        title:
-          updated.title,
+          title:
+            updated.title,
 
-        slug:
-          updated.slug,
+          slug:
+            updated.slug,
 
-        coverImage:
-          updated.coverImage,
+          coverImage:
+            updated.coverImage,
 
-        tags:
-          updated.tags,
+          tags:
+            updated.tags,
 
-        userId:
-          updated.userId,
-      });
+          userId:
+            updated.userId,
+        });
+      } catch (
+      error
+      ) {
+        console.error(
+          "Blog published but subscriber notification failed:",
+          error,
+        );
+      }
     }
 
 
     return {
       success:
-        firstPublication
+        publishImmediately
           ? "Blog published"
-          : "Blog Updated",
+          : submitForReview
+            ? "Blog submitted for admin review"
+            : "Blog saved as draft",
 
-      blogId,
+      blogId:
+        updated.id,
 
       slug:
         updated.slug,
