@@ -1,31 +1,113 @@
 "use server";
 
-import { auth } from "@/auth";
-import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import {
+  revalidatePath,
+} from "next/cache";
 
-export const deleteBlog = async (blogId: string) => {
-  const session = await auth();
-  const userId = session?.user.userId;
+import {
+  auth,
+} from "@/auth";
 
-  const blog = await db.blog.findUnique({ where: { id: blogId } });
+import {
+  db,
+} from "@/lib/db";
 
-  if (!blog) return { error: "blog not found" };
 
-  if (blog.userId !== userId) return { error: "unauthorized!" };
+export const deleteBlog =
+  async (
+    blogId:
+      string,
+  ) => {
+    const session =
+      await auth();
 
-  await db.blog.delete({
-    where: { id: blog.id },
-  });
 
-  try {
-    revalidatePath(`/blog/feed/1`);
-    revalidatePath(`/user/${userId}/1`);
-    // revalidate detail path in case of slug mapping
-    revalidatePath(`/blog/details/${blog.id}`);
-  } catch (e) {
-    // ignore
-  }
+    const currentUserId =
+      session?.user
+        ?.userId;
 
-  return { success: "blog deleted" };
-};
+
+    if (!currentUserId) {
+      return {
+        error:
+          "Please sign in.",
+      };
+    }
+
+
+    const blog =
+      await db.blog.findUnique({
+        where: {
+          id:
+            blogId,
+        },
+      });
+
+
+    if (!blog) {
+      return {
+        error:
+          "Blog not found",
+      };
+    }
+
+
+    const isAdmin =
+      session.user.role ===
+      "ADMIN";
+
+
+    const ownsBlog =
+      blog.userId ===
+      currentUserId;
+
+
+    if (
+      !ownsBlog &&
+      !isAdmin
+    ) {
+      return {
+        error:
+          "Unauthorized!",
+      };
+    }
+
+
+    await db.blog.delete({
+      where: {
+        id:
+          blog.id,
+      },
+    });
+
+
+    try {
+      revalidatePath(
+        "/",
+      );
+
+      revalidatePath(
+        "/blog/feed/1",
+      );
+
+      revalidatePath(
+        "/admin",
+      );
+
+      revalidatePath(
+        `/user/${blog.userId}/1`,
+      );
+
+      revalidatePath(
+        `/blog/details/${blog.id}`,
+      );
+    } catch {
+      // Ignore.
+    }
+
+
+    return {
+      success:
+        "Blog deleted",
+    };
+  };

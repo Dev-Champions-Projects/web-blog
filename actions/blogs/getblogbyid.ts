@@ -1,151 +1,315 @@
 "use server";
 
-import { auth } from "@/auth";
-import { db } from "@/lib/db";
-import { parseIdFromSlugOrId } from "@/lib/slug";
+import {
+  BlogApprovalStatus,
+  Prisma,
+} from "@prisma/client";
 
-export const incrementBlogViews = async ({ blogId }: { blogId: string }) => {
-  if (!blogId) return;
+import {
+  auth,
+} from "@/auth";
 
-  try {
-    const id = parseIdFromSlugOrId(blogId) || blogId;
-    await db.blog.update({
-      where: { id },
-      data: {
-        views: {
-          increment: 1,
+import {
+  db,
+} from "@/lib/db";
+
+import {
+  parseIdFromSlugOrId,
+} from "@/lib/slug";
+
+
+const createBlogInclude =
+  (
+    currentUserId?:
+      string,
+  ) =>
+    ({
+      user: {
+        select: {
+          id:
+            true,
+
+          name:
+            true,
+
+          image:
+            true,
         },
       },
-    });
-  } catch (error) {
-    console.error("Unable to increment blog views", error);
-  }
-};
 
-export const getBlogById = async ({ blogId }: { blogId: string }) => {
-  if (!blogId) return { error: "No Blog ID" };
+      _count: {
+        select: {
+          claps:
+            true,
 
-  const session = await auth();
-  const userId = session?.user.userId;
-
-  try {
-    // try id first
-    let blog = await db.blog.findUnique({
-      where: { id: blogId },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
-          },
-        },
-        _count: {
-          select: {
-            claps: true,
-            comments: true,
-          },
-        },
-        claps: {
-          where: {
-            userId,
-          },
-          select: {
-            id: true,
-          },
-        },
-        bookmarks: {
-          where: {
-            userId,
-          },
-          select: {
-            id: true,
-          },
+          comments:
+            true,
         },
       },
-    });
 
-    // if not found, maybe the param is a slugged string like `my-title-<id>` or the slug itself
-    if (!blog) {
-      const idCandidate = parseIdFromSlugOrId(blogId);
-      if (idCandidate && idCandidate !== blogId) {
-        blog = await db.blog.findUnique({
-          where: { id: idCandidate },
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
+      claps: {
+        where:
+          currentUserId
+            ? {
+              userId:
+                currentUserId,
+            }
+            : {
+              id: {
+                equals:
+                  "__anonymous__",
               },
             },
-            _count: {
-              select: {
-                claps: true,
-                comments: true,
+
+        select: {
+          id:
+            true,
+        },
+      },
+
+      bookmarks: {
+        where:
+          currentUserId
+            ? {
+              userId:
+                currentUserId,
+            }
+            : {
+              id: {
+                equals:
+                  "__anonymous__",
               },
             },
-            claps: {
-              where: {
-                userId,
-              },
-              select: {
-                id: true,
-              },
-            },
-            bookmarks: {
-              where: {
-                userId,
-              },
-              select: {
-                id: true,
-              },
-            },
-          },
-        });
-      }
+
+        select: {
+          id:
+            true,
+        },
+      },
+    }) satisfies Prisma.BlogInclude;
+
+
+export const incrementBlogViews =
+  async ({
+    blogId,
+  }: {
+    blogId:
+    string;
+  }) => {
+    if (!blogId) {
+      return;
     }
 
-    // final fallback: try to find by slug field
-    if (!blog) {
-      blog = await db.blog.findUnique({
-        where: { slug: blogId },
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-            },
+
+    try {
+      const idCandidate =
+        parseIdFromSlugOrId(
+          blogId,
+        );
+
+
+      const publicBlog =
+        await db.blog.findFirst({
+          where: {
+            isPublished:
+              true,
+
+            approvalStatus:
+              BlogApprovalStatus.APPROVED,
+
+            OR: [
+              {
+                id:
+                  idCandidate ??
+                  blogId,
+              },
+
+              {
+                slug:
+                  blogId,
+              },
+            ],
           },
-          _count: {
-            select: {
-              claps: true,
-              comments: true,
-            },
+
+          select: {
+            id:
+              true,
           },
-          claps: {
-            where: {
-              userId,
-            },
-            select: {
-              id: true,
-            },
-          },
-          bookmarks: {
-            where: {
-              userId,
-            },
-            select: {
-              id: true,
-            },
+        });
+
+
+      if (!publicBlog) {
+        return;
+      }
+
+
+      await db.blog.update({
+        where: {
+          id:
+            publicBlog.id,
+        },
+
+        data: {
+          views: {
+            increment:
+              1,
           },
         },
       });
+    } catch (
+    error
+    ) {
+      console.error(
+        "Unable to increment blog views",
+        error,
+      );
+    }
+  };
+
+
+export const getBlogById =
+  async ({
+    blogId,
+  }: {
+    blogId:
+    string;
+  }) => {
+    if (!blogId) {
+      return {
+        error:
+          "No Blog ID",
+      };
     }
 
-    return { success: { blog } };
-  } catch (error) {
-    return { error: "Error fetching blog content!" };
-  }
-};
+
+    const session =
+      await auth();
+
+
+    const currentUserId =
+      session?.user
+        ?.userId;
+
+
+    const isAdmin =
+      session?.user
+        ?.role ===
+      "ADMIN";
+
+
+    const include =
+      createBlogInclude(
+        currentUserId,
+      );
+
+
+    try {
+      let blog =
+        await db.blog.findUnique({
+          where: {
+            id:
+              blogId,
+          },
+
+          include,
+        });
+
+
+      if (!blog) {
+        const idCandidate =
+          parseIdFromSlugOrId(
+            blogId,
+          );
+
+
+        if (
+          idCandidate &&
+          idCandidate !==
+          blogId
+        ) {
+          blog =
+            await db.blog.findUnique({
+              where: {
+                id:
+                  idCandidate,
+              },
+
+              include,
+            });
+        }
+      }
+
+
+      if (!blog) {
+        blog =
+          await db.blog.findUnique({
+            where: {
+              slug:
+                blogId,
+            },
+
+            include,
+          });
+      }
+
+
+      if (!blog) {
+        return {
+          success: {
+            blog:
+              null,
+          },
+        };
+      }
+
+
+      const isPublic =
+        blog.isPublished &&
+        blog.approvalStatus ===
+        BlogApprovalStatus.APPROVED;
+
+
+      const isOwner =
+        Boolean(
+          currentUserId &&
+          blog.userId ===
+          currentUserId,
+        );
+
+
+      const canPreview =
+        isOwner ||
+        isAdmin;
+
+
+      if (
+        !isPublic &&
+        !canPreview
+      ) {
+        return {
+          error:
+            "This article is not available.",
+        };
+      }
+
+
+      return {
+        success: {
+          blog,
+        },
+      };
+    } catch (
+    error
+    ) {
+      console.error(
+        "Unable to fetch blog:",
+        error,
+      );
+
+
+      return {
+        error:
+          "Error fetching blog content!",
+      };
+    }
+  };
