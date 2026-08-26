@@ -141,7 +141,7 @@ const BlogFeed = async ({
      * Change to 8 whenever you decide
      * to apply that improvement.
      */
-    limit: 5,
+    limit: 8,
 
     searchObj,
   });
@@ -187,10 +187,9 @@ const BlogFeed = async ({
 
     emptyActionHref = "/blog/feed/1";
   } else if (searchObj.title) {
-
-  /*
-   * TITLE / SEARCH
-   */
+    /*
+     * TITLE / SEARCH
+     */
     emptyTitle = `No results for “${searchObj.title}”`;
 
     emptyDescription =
@@ -200,16 +199,15 @@ const BlogFeed = async ({
 
     emptyActionHref = "/blog/feed/1";
   } else if (currentPage > 1) {
-
-  /*
-   * PAGINATION
-   *
-   * Example:
-   *
-   * /blog/feed/20
-   *
-   * when only a few pages currently exist.
-   */
+    /*
+     * PAGINATION
+     *
+     * Example:
+     *
+     * /blog/feed/20
+     *
+     * when only a few pages currently exist.
+     */
     emptyTitle = "Nothing on this page yet";
 
     emptyDescription =

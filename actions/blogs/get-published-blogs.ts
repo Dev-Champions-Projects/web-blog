@@ -17,7 +17,7 @@ import {
 export const getPublishedBlogs =
   async ({
     page = 1,
-    limit = 5,
+    limit = 8,
     searchObj,
   }: {
     page:
