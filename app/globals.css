@@ -137,6 +137,36 @@ body::-webkit-scrollbar-thumb:hover,
   }
 }
 
+/* ========================================
+   TECH PATH ALERT MODAL SCROLLBAR
+======================================== */
+
+.tech-path-alert-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #409fb6 transparent;
+}
+
+/* Chrome, Edge and Safari */
+.tech-path-alert-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tech-path-alert-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 999px;
+}
+
+.tech-path-alert-scrollbar::-webkit-scrollbar-thumb {
+  background: #409fb6;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+}
+
+.tech-path-alert-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #5a1c4b;
+}
+
 /* 
 
 html {
