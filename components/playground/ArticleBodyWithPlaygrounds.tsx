@@ -3,7 +3,7 @@
 import { useRef } from "react";
 
 import BlockNoteEditor from "@/components/blog/editor/BlockNoteEditorClient";
-
+import ArticleCodeCopyButtons from "@/components/blog/ArticleCodeCopyButtons";
 import InlineCodePlaygrounds from "@/components/playground/InlineCodePlaygrounds";
 
 interface ArticleBodyWithPlaygroundsProps {
@@ -18,6 +18,8 @@ export default function ArticleBodyWithPlaygrounds({
   return (
     <div ref={rootRef} data-tech-path-article-body>
       <BlockNoteEditor editable={false} initialContent={content} />
+
+      <ArticleCodeCopyButtons rootRef={rootRef} />
 
       <InlineCodePlaygrounds content={content} rootRef={rootRef} />
     </div>
