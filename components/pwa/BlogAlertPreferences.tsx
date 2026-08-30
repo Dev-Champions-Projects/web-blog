@@ -112,8 +112,19 @@ export default function BlogAlertPreferences({
         }
 
         await onEnable(preferences);
+
         onSaved(preferences);
-        onClose();
+
+        /*
+         * Do not call onClose here.
+         *
+         * In onboarding mode, onClose represents a
+         * dismissal/"Not now" action and therefore
+         * starts the snooze.
+         *
+         * A successful onEnable already closes the
+         * onboarding from PushNotificationOnboarding.
+         */
         return;
       }
 
@@ -176,7 +187,9 @@ export default function BlogAlertPreferences({
               id="tech-path-alert-settings"
               className="mt-1 text-xl font-bold text-slate-950 dark:text-white"
             >
-              {onboarding ? "Stay connected to Tech Path" : "Personalize your alerts"}
+              {onboarding
+                ? "Stay connected to Tech Path"
+                : "Personalize your alerts"}
             </h2>
 
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -196,15 +209,18 @@ export default function BlogAlertPreferences({
           </button>
         </header>
 
-        <div className="min-h-0 flex-1 space-y-7 overflow-y-auto px-5 py-6 sm:px-7">
+        <div className="tech-path-alert-scrollbar min-h-0 flex-1 space-y-7 overflow-y-auto px-5 py-6 sm:px-7">
           <section className="space-y-3">
             <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
               <div className="flex gap-3">
                 <BellRing className="mt-0.5 h-5 w-5 shrink-0 text-[#5A1C4B] dark:text-[#7fd2eb]" />
                 <div>
-                  <p className="font-bold text-slate-900 dark:text-white">New articles</p>
+                  <p className="font-bold text-slate-900 dark:text-white">
+                    New articles
+                  </p>
                   <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                    Notify me when a matching Tech Path article is first published.
+                    Notify me when a matching Tech Path article is first
+                    published.
                   </p>
                 </div>
               </div>
@@ -252,7 +268,8 @@ export default function BlogAlertPreferences({
                     Learning reminders
                   </p>
                   <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                    If you have been away, send a useful reminder after about 7 days and one final reminder around day 14.
+                    If you have been away, send a useful reminder after about 7
+                    days and one final reminder around day 14.
                   </p>
                 </div>
               </div>
@@ -272,9 +289,12 @@ export default function BlogAlertPreferences({
           <section>
             <div className="flex items-end justify-between gap-4">
               <div>
-                <h3 className="font-bold text-slate-950 dark:text-white">Topics</h3>
+                <h3 className="font-bold text-slate-950 dark:text-white">
+                  Topics
+                </h3>
                 <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                  Select topics you care about. Leave everything unselected to receive articles from all topics.
+                  Select topics you care about. Leave everything unselected to
+                  receive articles from all topics.
                 </p>
               </div>
 

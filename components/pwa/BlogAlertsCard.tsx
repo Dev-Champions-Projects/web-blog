@@ -11,8 +11,12 @@ import BlogAlertPreferences, {
   DEFAULT_BLOG_ALERT_PREFERENCES,
 } from "@/components/pwa/BlogAlertPreferences";
 import { setNotificationOnboardingState } from "@/lib/pushOnboarding";
-import { trackEvent } from "@/lib/analytics";
+import {
+  TECH_PATH_PUSH_SUBSCRIPTION_CHANGED_EVENT,
+  type TechPathPushSubscriptionChangedDetail,
+} from "@/lib/pushClient";
 
+import { trackEvent } from "@/lib/analytics";
 type AlertState =
   | "loading"
   | "ready"
@@ -147,8 +151,56 @@ export default function BlogAlertsCard() {
         setState("error");
       }
     }
-
     void check();
+
+    function handlePushSubscriptionChanged(event: Event) {
+      const customEvent =
+        event as CustomEvent<TechPathPushSubscriptionChangedDetail>;
+
+      const detail = customEvent.detail;
+
+      if (!detail) {
+        return;
+      }
+
+      if (detail.state === "subscribed") {
+        setEndpoint(detail.endpoint);
+
+        setState("subscribed");
+
+        setMessage(
+          detail.message ?? "Tech Path alerts are enabled on this device.",
+        );
+
+        return;
+      }
+
+      /*
+       * Ready means there is currently no active
+       * push subscription.
+       */
+      setEndpoint(null);
+
+      setState("ready");
+
+      setPreferences(DEFAULT_BLOG_ALERT_PREFERENCES);
+
+      setPreferencesOpen(false);
+
+      setMessage(detail.message ?? "");
+    }
+
+    window.addEventListener(
+      TECH_PATH_PUSH_SUBSCRIPTION_CHANGED_EVENT,
+      handlePushSubscriptionChanged,
+    );
+
+    return () => {
+      window.removeEventListener(
+        TECH_PATH_PUSH_SUBSCRIPTION_CHANGED_EVENT,
+        handlePushSubscriptionChanged,
+      );
+    };
   }, []);
 
   async function enableAlerts() {
