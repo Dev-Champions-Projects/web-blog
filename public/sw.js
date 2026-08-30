@@ -1,4 +1,4 @@
-const CACHE_VERSION = "techpath-v3";
+const CACHE_VERSION = "techpath-v4";
 
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 
@@ -65,29 +65,19 @@ self.addEventListener(
 
     const options = {
       body: payload.body || "A new Tech Path update is available.",
-
       icon: payload.icon || "/icons/icon-192.png",
-
       badge: payload.badge || "/icons/icon-192.png",
-
       tag: payload.tag || "tech-path-notification",
-
       renotify: Boolean(payload.renotify),
-
       data: {
         url: payload.url || "/blog/feed/1",
-
         type: payload.type || "general",
+        campaign: payload.campaign || payload.type || "general",
+        pushId: payload.pushId || payload.tag || "",
       },
     };
 
-    event.waitUntil(
-      self.registration.showNotification(
-        title,
-
-        options,
-      ),
-    );
+    event.waitUntil(self.registration.showNotification(title, options));
   },
 );
 
@@ -103,35 +93,38 @@ self.addEventListener(
 
     event.waitUntil(
       (async () => {
-        const suppliedUrl = event.notification.data?.url || "/blog/feed/1";
+        const data = event.notification.data || {};
+        const suppliedUrl = data.url || "/blog/feed/1";
 
         let targetUrl;
 
         try {
-          targetUrl = new URL(
-            suppliedUrl,
-
-            self.location.origin,
-          );
+          targetUrl = new URL(suppliedUrl, self.location.origin);
 
           if (targetUrl.origin !== self.location.origin) {
-            targetUrl = new URL(
-              "/blog/feed/1",
-
-              self.location.origin,
-            );
+            targetUrl = new URL("/blog/feed/1", self.location.origin);
           }
         } catch {
-          targetUrl = new URL(
-            "/blog/feed/1",
+          targetUrl = new URL("/blog/feed/1", self.location.origin);
+        }
 
-            self.location.origin,
-          );
+        const pushType = data.type || "general";
+        const campaign = data.campaign || pushType;
+        const pushId = data.pushId || event.notification.tag || "";
+
+        targetUrl.searchParams.set("utm_source", "tech_path");
+        targetUrl.searchParams.set("utm_medium", "web_push");
+        targetUrl.searchParams.set("utm_campaign", campaign);
+        targetUrl.searchParams.set("push_type", pushType);
+        targetUrl.searchParams.set("push_campaign", campaign);
+
+        if (pushId) {
+          targetUrl.searchParams.set("utm_content", pushId);
+          targetUrl.searchParams.set("push_id", pushId);
         }
 
         const windows = await self.clients.matchAll({
           type: "window",
-
           includeUncontrolled: true,
         });
 
@@ -149,7 +142,7 @@ self.addEventListener(
               return;
             }
           } catch {
-            // Continue.
+            // Continue to the next client.
           }
         }
 

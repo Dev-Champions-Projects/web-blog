@@ -17,7 +17,12 @@ export type TechPathPushPayload = {
     type?:
     | "test"
     | "new-post"
-    | "announcement";
+    | "announcement"
+    | "winback";
+
+    campaign?: string;
+
+    pushId?: string;
 };
 
 
@@ -53,7 +58,7 @@ function configureWebPush() {
     const subject =
         process.env
             .VAPID_SUBJECT ||
-        "mailto:info@dev-champions.tech";
+        "mailto:dev.champions.it@gmail.com";
 
 
     if (

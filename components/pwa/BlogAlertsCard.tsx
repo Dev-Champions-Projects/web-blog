@@ -10,6 +10,8 @@ import BlogAlertPreferences, {
   BlogAlertPreferencesValue,
   DEFAULT_BLOG_ALERT_PREFERENCES,
 } from "@/components/pwa/BlogAlertPreferences";
+import { setNotificationOnboardingState } from "@/lib/pushOnboarding";
+import { trackEvent } from "@/lib/analytics";
 
 type AlertState =
   | "loading"
@@ -197,6 +199,14 @@ export default function BlogAlertsCard() {
 
       setState("subscribed");
 
+      setNotificationOnboardingState("enabled");
+
+      if (window.localStorage.getItem("devChampionsConsent") === "accepted") {
+        trackEvent("push_subscription_enabled", {
+          source: "blog_alert_card",
+        });
+      }
+
       setMessage("Tech Path alerts are enabled on this device.");
     } catch (error) {
       console.error("Unable to enable Tech Path alerts:", error);
@@ -250,6 +260,8 @@ export default function BlogAlertsCard() {
       setEndpoint(null);
 
       setState("ready");
+
+      setNotificationOnboardingState("disabled");
 
       setMessage("Tech Path alerts have been turned off.");
     } catch (error) {

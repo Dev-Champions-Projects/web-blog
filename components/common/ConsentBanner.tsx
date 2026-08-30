@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  getNotificationOnboardingState,
+  setNotificationOnboardingState,
+  TECH_PATH_NOTIFICATION_ONBOARDING_EVENT,
+} from "@/lib/pushOnboarding";
 
 const STORAGE_KEY = "devChampionsConsent";
 
@@ -57,17 +62,28 @@ export default function ConsentBanner() {
 
   const handleAccept = () => {
     window.localStorage.setItem(STORAGE_KEY, "accepted");
-
     updateGoogleConsent("granted");
-
     setConsent("accepted");
+
+    /*
+     * Analytics consent and push consent are separate.
+     * Accepting the banner only starts the notification
+     * onboarding modal. The browser permission prompt is
+     * shown later, only if the user explicitly chooses
+     * Enable Alerts inside that modal.
+     */
+    if (!getNotificationOnboardingState()) {
+      setNotificationOnboardingState("pending");
+
+      window.dispatchEvent(
+        new CustomEvent(TECH_PATH_NOTIFICATION_ONBOARDING_EVENT),
+      );
+    }
   };
 
   const handleDecline = () => {
     window.localStorage.setItem(STORAGE_KEY, "declined");
-
     updateGoogleConsent("denied");
-
     setConsent("declined");
   };
 

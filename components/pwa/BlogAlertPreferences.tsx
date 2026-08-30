@@ -1,35 +1,37 @@
 "use client";
 
-import { BellRing, Check, Megaphone, RotateCcw, X } from "lucide-react";
-
+import {
+  BellRing,
+  Check,
+  Megaphone,
+  RotateCcw,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
-
 import { tags as availableTags } from "@/lib/tags";
 
 export type BlogAlertPreferencesValue = {
   newPosts: boolean;
-
   specialAnnouncements: boolean;
-
+  learningReminders: boolean;
   tags: string[];
 };
 
 export const DEFAULT_BLOG_ALERT_PREFERENCES: BlogAlertPreferencesValue = {
   newPosts: true,
-
   specialAnnouncements: true,
-
+  learningReminders: true,
   tags: [],
 };
 
 type Props = {
-  endpoint: string;
-
+  endpoint?: string | null;
   initialPreferences: BlogAlertPreferencesValue;
-
   onClose: () => void;
-
   onSaved: (preferences: BlogAlertPreferencesValue) => void;
+  mode?: "manage" | "onboarding";
+  onEnable?: (preferences: BlogAlertPreferencesValue) => Promise<void>;
 };
 
 function Toggle({
@@ -37,7 +39,6 @@ function Toggle({
   onChange,
 }: {
   checked: boolean;
-
   onChange: () => void;
 }) {
   return (
@@ -62,20 +63,19 @@ function Toggle({
 }
 
 export default function BlogAlertPreferences({
-  endpoint,
+  endpoint = null,
   initialPreferences,
   onClose,
   onSaved,
+  mode = "manage",
+  onEnable,
 }: Props) {
   const [preferences, setPreferences] = useState(initialPreferences);
-
   const [saving, setSaving] = useState(false);
-
   const [error, setError] = useState("");
 
   useEffect(() => {
     const oldOverflow = document.body.style.overflow;
-
     document.body.style.overflow = "hidden";
 
     function keyDown(event: KeyboardEvent) {
@@ -88,7 +88,6 @@ export default function BlogAlertPreferences({
 
     return () => {
       document.body.style.overflow = oldOverflow;
-
       window.removeEventListener("keydown", keyDown);
     };
   }, [onClose]);
@@ -96,7 +95,6 @@ export default function BlogAlertPreferences({
   function toggleTag(tag: string) {
     setPreferences((current) => ({
       ...current,
-
       tags: current.tags.includes(tag)
         ? current.tags.filter((value) => value !== tag)
         : [...current.tags, tag],
@@ -105,27 +103,34 @@ export default function BlogAlertPreferences({
 
   async function save() {
     setSaving(true);
-
     setError("");
 
     try {
-      const response = await fetch(
-        "/api/push/preferences",
+      if (mode === "onboarding") {
+        if (!onEnable) {
+          throw new Error("Notification onboarding is not available.");
+        }
 
-        {
-          method: "PATCH",
+        await onEnable(preferences);
+        onSaved(preferences);
+        onClose();
+        return;
+      }
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+      if (!endpoint) {
+        throw new Error("Push subscription not found.");
+      }
 
-          body: JSON.stringify({
-            endpoint,
-
-            ...preferences,
-          }),
+      const response = await fetch("/api/push/preferences", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          endpoint,
+          ...preferences,
+        }),
+      });
 
       const data = await response.json();
 
@@ -134,12 +139,11 @@ export default function BlogAlertPreferences({
       }
 
       onSaved(data.preferences);
-
       onClose();
-    } catch (error) {
+    } catch (saveError) {
       setError(
-        error instanceof Error
-          ? error.message
+        saveError instanceof Error
+          ? saveError.message
           : "Unable to save alert preferences.",
       );
     } finally {
@@ -148,6 +152,7 @@ export default function BlogAlertPreferences({
   }
 
   const topics = availableTags.filter((tag) => tag !== "All");
+  const onboarding = mode === "onboarding";
 
   return (
     <div
@@ -171,11 +176,13 @@ export default function BlogAlertPreferences({
               id="tech-path-alert-settings"
               className="mt-1 text-xl font-bold text-slate-950 dark:text-white"
             >
-              Personalize your alerts
+              {onboarding ? "Stay connected to Tech Path" : "Personalize your alerts"}
             </h2>
 
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Choose what Tech Path should notify you about.
+              {onboarding
+                ? "Choose what should bring you back, then enable notifications on this device."
+                : "Choose what Tech Path should notify you about."}
             </p>
           </div>
 
@@ -194,15 +201,10 @@ export default function BlogAlertPreferences({
             <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
               <div className="flex gap-3">
                 <BellRing className="mt-0.5 h-5 w-5 shrink-0 text-[#5A1C4B] dark:text-[#7fd2eb]" />
-
                 <div>
-                  <p className="font-bold text-slate-900 dark:text-white">
-                    New articles
-                  </p>
-
+                  <p className="font-bold text-slate-900 dark:text-white">New articles</p>
                   <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                    Notify me when a matching Tech Path article is first
-                    published.
+                    Notify me when a matching Tech Path article is first published.
                   </p>
                 </div>
               </div>
@@ -212,7 +214,6 @@ export default function BlogAlertPreferences({
                 onChange={() =>
                   setPreferences((current) => ({
                     ...current,
-
                     newPosts: !current.newPosts,
                   }))
                 }
@@ -222,12 +223,10 @@ export default function BlogAlertPreferences({
             <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
               <div className="flex gap-3">
                 <Megaphone className="mt-0.5 h-5 w-5 shrink-0 text-[#5A1C4B] dark:text-[#7fd2eb]" />
-
                 <div>
                   <p className="font-bold text-slate-900 dark:text-white">
                     Special announcements
                   </p>
-
                   <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
                     Product updates and important Tech Path announcements.
                   </p>
@@ -239,8 +238,31 @@ export default function BlogAlertPreferences({
                 onChange={() =>
                   setPreferences((current) => ({
                     ...current,
-
                     specialAnnouncements: !current.specialAnnouncements,
+                  }))
+                }
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
+              <div className="flex gap-3">
+                <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-[#5A1C4B] dark:text-[#7fd2eb]" />
+                <div>
+                  <p className="font-bold text-slate-900 dark:text-white">
+                    Learning reminders
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                    If you have been away, send a useful reminder after about 7 days and one final reminder around day 14.
+                  </p>
+                </div>
+              </div>
+
+              <Toggle
+                checked={preferences.learningReminders}
+                onChange={() =>
+                  setPreferences((current) => ({
+                    ...current,
+                    learningReminders: !current.learningReminders,
                   }))
                 }
               />
@@ -250,13 +272,9 @@ export default function BlogAlertPreferences({
           <section>
             <div className="flex items-end justify-between gap-4">
               <div>
-                <h3 className="font-bold text-slate-950 dark:text-white">
-                  Topics
-                </h3>
-
+                <h3 className="font-bold text-slate-950 dark:text-white">Topics</h3>
                 <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                  Select topics you care about. Leave everything unselected to
-                  receive articles from all topics.
+                  Select topics you care about. Leave everything unselected to receive articles from all topics.
                 </p>
               </div>
 
@@ -266,11 +284,10 @@ export default function BlogAlertPreferences({
                   onClick={() =>
                     setPreferences((current) => ({
                       ...current,
-
                       tags: [],
                     }))
                   }
-                  className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-[#5A1C4B] dark:text-[#7fd2eb]"
+                  className="inline-flex shrink-0 items-center gap-1.5 text-xs font-bold text-[#5A1C4B] dark:text-[#7fd2eb]"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
                   All topics
@@ -294,7 +311,6 @@ export default function BlogAlertPreferences({
                     }`}
                   >
                     {selected && <Check className="h-3.5 w-3.5" />}
-
                     {tag}
                   </button>
                 );
@@ -313,6 +329,9 @@ export default function BlogAlertPreferences({
                 : preferences.tags.length === 0
                   ? "You'll receive new article alerts from all Tech Path topics."
                   : `You'll receive new articles matching: ${preferences.tags.join(", ")}.`}
+              {preferences.learningReminders
+                ? " Learning reminders are on."
+                : " Learning reminders are off."}
             </p>
           </div>
 
@@ -333,7 +352,7 @@ export default function BlogAlertPreferences({
             onClick={onClose}
             className="min-h-11 rounded-xl border border-slate-300 px-5 text-sm font-semibold"
           >
-            Cancel
+            {onboarding ? "Not now" : "Cancel"}
           </button>
 
           <button
@@ -342,7 +361,13 @@ export default function BlogAlertPreferences({
             onClick={save}
             className="min-h-11 rounded-xl bg-[#5A1C4B] px-5 text-sm font-bold text-white disabled:opacity-60 dark:bg-[#409FB6] dark:text-slate-950"
           >
-            {saving ? "Saving..." : "Save Preferences"}
+            {saving
+              ? onboarding
+                ? "Enabling..."
+                : "Saving..."
+              : onboarding
+                ? "Enable Alerts"
+                : "Save Preferences"}
           </button>
         </footer>
       </section>

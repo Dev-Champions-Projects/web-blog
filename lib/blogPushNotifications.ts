@@ -1033,6 +1033,12 @@ export async function notifyNewBlogSubscribers(
 
                     type:
                         "new-post",
+
+                    campaign:
+                        "new_article",
+
+                    pushId:
+                        blog.id,
                 },
             );
 
@@ -1255,6 +1261,9 @@ export async function sendTechPathAnnouncement({
 
                 type:
                     "announcement",
+
+                campaign:
+                    "special_announcement",
             },
         );
 

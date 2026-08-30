@@ -18,6 +18,8 @@ import AnalyticsConsentLoader from "@/components/common/AnalyticsConsentLoader";
 import GoogleAnalyticsTracker from "@/components/common/GoogleAnalyticsTracker";
 
 import RegisterServiceWorker from "@/components/pwa/RegisterServiceWorker";
+import PushNotificationOnboarding from "@/components/pwa/PushNotificationOnboarding";
+import PushActivityTracker from "@/components/pwa/PushActivityTracker";
 // const poppins = Poppins({
 //   variable: "--font-poppins",
 //   subsets: ["latin"],
@@ -162,6 +164,8 @@ export default async function RootLayout({
         )}
       >
         <RegisterServiceWorker />
+        <PushActivityTracker />
+        <PushNotificationOnboarding />
 
         <Script id="google-consent-default" strategy="beforeInteractive">
           {`
