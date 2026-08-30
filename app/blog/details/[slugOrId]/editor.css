@@ -1,3 +1,90 @@
 .bn-editor {
   padding-inline: 4px !important;
 }
+
+/*
+ * ==========================================================
+ * PUBLISHED ARTICLE CODE BLOCKS
+ * ==========================================================
+ */
+
+[data-tech-path-article-body] .tech-path-code-block-host {
+  position: relative;
+  max-width: 100%;
+}
+
+/*
+ * Copy control.
+ *
+ * It is mounted into the BlockNote block wrapper instead
+ * of modifying the stored article content.
+ */
+[data-tech-path-article-body] .tech-path-code-copy-mount {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.6rem;
+  z-index: 20;
+}
+
+/*
+ * ==========================================================
+ * CODE HORIZONTAL SCROLLBAR
+ * ==========================================================
+ *
+ * Keep horizontal scrolling available because long lines
+ * still need to be reachable, but make the scrollbar
+ * considerably less intrusive.
+ */
+
+[data-tech-path-article-body] [data-content-type="codeBlock"],
+[data-tech-path-article-body] pre {
+  max-width: 100%;
+
+  scrollbar-width: thin;
+  scrollbar-color: #409fb6 transparent;
+
+  overscroll-behavior-inline: contain;
+}
+
+/* Chrome / Edge / Safari */
+[data-tech-path-article-body]
+  [data-content-type="codeBlock"]::-webkit-scrollbar,
+[data-tech-path-article-body] pre::-webkit-scrollbar {
+  height: 5px;
+}
+
+[data-tech-path-article-body]
+  [data-content-type="codeBlock"]::-webkit-scrollbar-track,
+[data-tech-path-article-body] pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-tech-path-article-body]
+  [data-content-type="codeBlock"]::-webkit-scrollbar-thumb,
+[data-tech-path-article-body] pre::-webkit-scrollbar-thumb {
+  background: #409fb6;
+  border-radius: 9999px;
+}
+
+[data-tech-path-article-body]
+  [data-content-type="codeBlock"]::-webkit-scrollbar-thumb:hover,
+[data-tech-path-article-body] pre::-webkit-scrollbar-thumb:hover {
+  background: #5a1c4b;
+}
+
+[data-tech-path-article-body]
+  [data-content-type="codeBlock"]::-webkit-scrollbar-corner,
+[data-tech-path-article-body] pre::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/*
+ * Make the floating Copy control slightly more compact
+ * on small screens so it does not dominate the code block.
+ */
+@media (max-width: 640px) {
+  [data-tech-path-article-body] .tech-path-code-copy-mount {
+    top: 0.4rem;
+    right: 0.4rem;
+  }
+}
