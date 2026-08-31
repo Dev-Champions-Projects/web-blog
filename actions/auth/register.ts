@@ -1,30 +1,52 @@
 "use server";
 
 import bcrypt from "bcryptjs";
-import { RegisterSchema, RegisterSchemaType } from "@/schemas/RegisterSchema";
+
+import {
+  RegisterSchema,
+  RegisterSchemaType,
+} from "@/schemas/RegisterSchema";
+
 import { db } from "@/lib/db";
 import { getUserByEmail } from "@/lib/user";
+
 import {
   generateEmailVerificationToken,
   sendEmailVerificationToken,
 } from "@/lib/emailVerification";
 
-export const signUp = async (values: RegisterSchemaType) => {
-  const validateFields = RegisterSchema.safeParse(values);
+export const signUp = async (
+  values: RegisterSchemaType,
+) => {
+  const validateFields =
+    RegisterSchema.safeParse(values);
 
   if (!validateFields.success) {
-    return { error: "Invalid fields!" };
+    return {
+      error: "Invalid fields!",
+    };
   }
 
-  const { name, email, password } = validateFields.data;
+  const {
+    name,
+    email,
+    password,
+  } = validateFields.data;
 
-  const user = await getUserByEmail(email);
+  const user =
+    await getUserByEmail(email);
 
   if (user) {
-    return { error: "Email already in use!" };
+    return {
+      error: "Email already in use!",
+    };
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword =
+    await bcrypt.hash(
+      password,
+      10,
+    );
 
   await db.user.create({
     data: {
@@ -34,18 +56,31 @@ export const signUp = async (values: RegisterSchemaType) => {
     },
   });
 
-  const emailVerificationToken = await generateEmailVerificationToken(email);
-  const { error } = await sendEmailVerificationToken(
-    emailVerificationToken.email,
-    emailVerificationToken.token
-  );
+  const emailVerificationToken =
+    await generateEmailVerificationToken(
+      email,
+    );
+
+  const { error } =
+    await sendEmailVerificationToken(
+      emailVerificationToken.email,
+      emailVerificationToken.token,
+    );
 
   if (error) {
+    console.error(
+      "Registration verification email failed:",
+      error,
+    );
+
     return {
       error:
-        "Something went wrong while sending verification email! Try to login to resend the verification email!",
+        "Your account was created, but we couldn't send the verification email. Please try logging in to resend it.",
     };
   }
 
-  return { success: "Verification email sent!" };
+  return {
+    success:
+      "Verification email sent!",
+  };
 };
