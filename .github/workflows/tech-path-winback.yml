@@ -2,12 +2,24 @@ name: Tech Path Win-back Notifications
 
 on:
   schedule:
-    # 08:15 UTC = 09:15 WAT
-    - cron: "15 8 * * *"
+    - cron: "17 9 * * *"
+      timezone: "Africa/Lagos"
+
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run safely without sending notifications"
+        required: true
+        default: true
+        type: boolean
+
+concurrency:
+  group: tech-path-win-back
+  cancel-in-progress: false
 
 jobs:
   run-win-back:
+    name: Run Tech Path win-back
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -15,18 +27,48 @@ jobs:
       - name: Trigger Tech Path win-back cron
         env:
           CRON_SECRET: ${{ secrets.TECH_PATH_CRON_SECRET }}
+          CRON_URL: https://web-blog-3hpc.onrender.com/api/cron/win-back
+
         run: |
           if [ -z "$CRON_SECRET" ]; then
             echo "TECH_PATH_CRON_SECRET is not configured."
             exit 1
           fi
 
-          curl \
-            --fail \
-            --show-error \
-            --silent \
-            --retry 3 \
-            --retry-all-errors \
-            --max-time 120 \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            "https://path.dev-champions.tech/api/cron/win-back"
+          TARGET_URL="$CRON_URL"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && \
+             [ "${{ inputs.dry_run }}" = "true" ]; then
+            TARGET_URL="${CRON_URL}?dryRun=1"
+            echo "Running Tech Path win-back in DRY RUN mode."
+          else
+            echo "Running Tech Path win-back in LIVE mode."
+          fi
+
+          echo "Triggering Tech Path cron endpoint..."
+
+          HTTP_STATUS=$(
+            curl \
+              --location \
+              --show-error \
+              --silent \
+              --retry 3 \
+              --retry-delay 2 \
+              --max-time 120 \
+              --output /tmp/winback-response.json \
+              --write-out "%{http_code}" \
+              -H "Authorization: Bearer $CRON_SECRET" \
+              "$TARGET_URL"
+          )
+
+          echo "HTTP status: $HTTP_STATUS"
+          echo "Response:"
+          cat /tmp/winback-response.json
+          echo
+
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "Tech Path win-back cron failed."
+            exit 1
+          fi
+
+          echo "Tech Path win-back cron completed successfully."
