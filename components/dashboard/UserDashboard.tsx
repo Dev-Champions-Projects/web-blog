@@ -2,7 +2,7 @@ import Heading from "@/components/common/Heading";
 import UserDashboardCards from "@/components/dashboard/UserDashboardCards";
 import UserDashboardChart from "@/components/dashboard/UserDashboardChart";
 import UserDashboardRecent from "@/components/dashboard/UserDashboardRecent";
-
+import UserDashboardDrafts from "@/components/dashboard/UserDashboardDrafts";
 export interface RecentPost {
   id: string;
   title: string;
@@ -38,8 +38,17 @@ export interface UserDashboardData {
   readerStreak: number;
   streak: number;
   recentPosts: RecentPost[];
+  draftPosts: DraftPost[];
   topViewedPosts: TopViewedPost[];
   weeklyViews: WeeklyView[];
+}
+
+export interface DraftPost {
+  id: string;
+  title: string;
+  createdAt: Date;
+  isPublished: boolean;
+  approvalStatus: string;
 }
 
 const UserDashboard = ({
@@ -53,6 +62,7 @@ const UserDashboard = ({
   readerStreak,
   streak,
   recentPosts,
+  draftPosts,
   topViewedPosts,
   weeklyViews,
 }: UserDashboardData) => {
@@ -77,11 +87,11 @@ const UserDashboard = ({
         streak={streak}
         readerStreak={readerStreak}
       />
-      {/* <div className="grid gap-4 lg:grid-cols-[1.4fr_0.95fr]"> */}
+      <UserDashboardDrafts drafts={draftPosts} />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
         <UserDashboardRecent posts={recentPosts} />
-        {/* <div className="w-full min-w-0 flex flex-col gap-4">
-          <div className="w-full min-w-0 overflow-x-auto pb-2"> */}
+
         <UserDashboardChart
           weeklyViews={weeklyViews}
           topPosts={topViewedPosts}
