@@ -1,7 +1,7 @@
 "use server";
 
+import { BlogApprovalStatus } from "@prisma/client";
 import { db } from "@/lib/db";
-
 const normalizeDate = (date: Date) => {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
@@ -160,9 +160,15 @@ export const getUserDashboard = async (userId: string) => {
         );
 
         const recentPosts = await db.blog.findMany({
-            where: { userId },
+            where: {
+                userId,
+                isPublished: true,
+                approvalStatus: BlogApprovalStatus.APPROVED,
+            },
             take: 4,
-            orderBy: { createdAt: "desc" },
+            orderBy: {
+                createdAt: "desc",
+            },
             select: {
                 id: true,
                 title: true,
@@ -175,6 +181,24 @@ export const getUserDashboard = async (userId: string) => {
                         bookmarks: true,
                     },
                 },
+            },
+        });
+
+        const draftPosts = await db.blog.findMany({
+            where: {
+                userId,
+                isPublished: false,
+                approvalStatus: BlogApprovalStatus.DRAFT,
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+            select: {
+                id: true,
+                title: true,
+                createdAt: true,
+                isPublished: true,
+                approvalStatus: true,
             },
         });
 
@@ -208,6 +232,7 @@ export const getUserDashboard = async (userId: string) => {
                 readerStreak,
                 streak: 0,
                 recentPosts,
+                draftPosts,
                 topViewedPosts,
                 weeklyViews,
             },
