@@ -102,6 +102,16 @@ export const incrementBlogViews =
 
 
     try {
+      const session =
+        await auth();
+
+
+      const viewerId =
+        session?.user
+          ?.userId ??
+        null;
+
+
       const idCandidate =
         parseIdFromSlugOrId(
           blogId,
@@ -143,19 +153,42 @@ export const incrementBlogViews =
       }
 
 
-      await db.blog.update({
-        where: {
-          id:
-            publicBlog.id,
-        },
-
-        data: {
-          views: {
-            increment:
-              1,
+      /*
+       * Keep the historical Blog.views counter and the
+       * event-level BlogView analytics table in sync from
+       * this point forward.
+       *
+       * Blog.views preserves historical totals.
+       * BlogView gives us dated/viewer-specific analytics.
+       *
+       * The transaction guarantees that either both records
+       * are updated or neither one is updated.
+       */
+      await db.$transaction([
+        db.blog.update({
+          where: {
+            id:
+              publicBlog.id,
           },
-        },
-      });
+
+          data: {
+            views: {
+              increment:
+                1,
+            },
+          },
+        }),
+
+        db.blogView.create({
+          data: {
+            blogId:
+              publicBlog.id,
+
+            userId:
+              viewerId,
+          },
+        }),
+      ]);
     } catch (
     error
     ) {
