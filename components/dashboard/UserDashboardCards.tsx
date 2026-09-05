@@ -1,4 +1,13 @@
-import { Sparkles, Bookmark, MessageCircle, Heart, Eye } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import {
+  Bookmark,
+  Eye,
+  FileText,
+  Flame,
+  MessageCircle,
+  Sparkles,
+  Users,
+} from "lucide-react";
 
 interface UserDashboardCardsProps {
   totalPosts: number;
@@ -7,48 +16,19 @@ interface UserDashboardCardsProps {
   totalComments: number;
   totalViews: number;
   totalReaders: number;
-  streak: number;
   readerStreak: number;
 }
 
-const cardData = [
-  {
-    title: "Total posts",
-    icon: Heart,
-    descriptor: "Published posts",
-    key: "posts",
-  },
-  {
-    title: "Total claps",
-    icon: Sparkles,
-    descriptor: "All reaction counts",
-    key: "claps",
-  },
-  {
-    title: "Saved count",
-    icon: Bookmark,
-    descriptor: "Total bookmarks across your posts",
-    key: "bookmarks",
-  },
-  {
-    title: "Total views",
-    icon: Eye,
-    descriptor: "All post view counts",
-    key: "views",
-  },
-  {
-    title: "Total readers",
-    icon: MessageCircle,
-    descriptor: "Unique students reading your posts",
-    key: "readers",
-  },
-  {
-    title: "Comment count",
-    icon: MessageCircle,
-    descriptor: "Reader engagement",
-    key: "comments",
-  },
-];
+interface DashboardCard {
+  key: string;
+  title: string;
+  description: string;
+  value: number;
+  icon: LucideIcon;
+  iconClassName: string;
+}
+
+const numberFormatter = new Intl.NumberFormat("en-US");
 
 const UserDashboardCards = ({
   totalPosts,
@@ -59,67 +39,127 @@ const UserDashboardCards = ({
   totalReaders,
   readerStreak,
 }: UserDashboardCardsProps) => {
+  const cards: DashboardCard[] = [
+    {
+      key: "posts",
+      title: "Total posts",
+      description: "All posts you have created",
+      value: totalPosts,
+      icon: FileText,
+      iconClassName:
+        "bg-[#5A1C4B]/10 text-[#5A1C4B] dark:bg-[#5A1C4B]/25 dark:text-[#E7B9DA]",
+    },
+    {
+      key: "views",
+      title: "Total views",
+      description: "Historical views across your posts",
+      value: totalViews,
+      icon: Eye,
+      iconClassName:
+        "bg-[#409FB6]/12 text-[#23778A] dark:bg-[#409FB6]/20 dark:text-[#8DD0DE]",
+    },
+    {
+      key: "readers",
+      title: "Unique readers",
+      description: "Signed-in readers, excluding you",
+      value: totalReaders,
+      icon: Users,
+      iconClassName:
+        "bg-sky-100 text-sky-700 dark:bg-sky-950/70 dark:text-sky-300",
+    },
+    {
+      key: "claps",
+      title: "Claps received",
+      description: "Reactions across your posts",
+      value: totalClaps,
+      icon: Sparkles,
+      iconClassName:
+        "bg-violet-100 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300",
+    },
+    {
+      key: "bookmarks",
+      title: "Total saves",
+      description: "Bookmarks across your posts",
+      value: totalBookmarks,
+      icon: Bookmark,
+      iconClassName:
+        "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300",
+    },
+    {
+      key: "comments",
+      title: "Comments received",
+      description: "Comments left on your posts",
+      value: totalComments,
+      icon: MessageCircle,
+      iconClassName:
+        "bg-amber-100 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300",
+    },
+  ];
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-      {cardData.map((card) => {
-        const value =
-          card.key === "posts"
-            ? totalPosts
-            : card.key === "claps"
-              ? totalClaps
-              : card.key === "bookmarks"
-                ? totalBookmarks
-                : card.key === "views"
-                  ? totalViews
-                  : card.key === "readers"
-                    ? totalReaders
-                    : totalComments;
+    <section aria-label="Dashboard metrics">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map((card) => {
+          const Icon = card.icon;
 
-        const Icon = card.icon;
+          return (
+            <article
+              key={card.key}
+              className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-950 dark:hover:border-slate-700"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    {card.title}
+                  </p>
 
-        return (
-          <div
-            key={card.key}
-            className="group rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-slate-700 dark:bg-slate-900/80"
-          >
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                  {card.descriptor}
+                  <p className="mt-2 text-3xl font-bold tracking-tight text-slate-950 dark:text-white">
+                    {numberFormatter.format(card.value)}
+                  </p>
+                </div>
+
+                <div
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${card.iconClassName}`}
+                >
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </div>
+              </div>
+
+              <p className="mt-4 text-xs leading-5 text-slate-500 dark:text-slate-500">
+                {card.description}
+              </p>
+            </article>
+          );
+        })}
+
+        <article className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 shadow-sm dark:border-amber-900/60 dark:bg-amber-950/20 sm:col-span-2 xl:col-span-2">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                Reader activity streak
+              </p>
+
+              <div className="mt-2 flex items-baseline gap-2">
+                <p className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white">
+                  {numberFormatter.format(readerStreak)}
                 </p>
-                <h3 className="mt-3 text-3xl font-bold text-slate-900 dark:text-slate-100">
-                  {value}
-                </h3>
+                <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  {readerStreak === 1 ? "day" : "days"}
+                </span>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-slate-100 text-slate-900 shadow-sm dark:bg-slate-800 dark:text-slate-100">
-                <Icon size={24} />
-              </div>
+
+              <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-500">
+                Consecutive days with external reader activity on your posts.
+              </p>
             </div>
-            <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-              {card.title}
-            </p>
+
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900/60 dark:text-amber-300">
+              <Flame className="h-6 w-6" aria-hidden="true" />
+            </div>
           </div>
-        );
-      })}
-      <div className="rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-slate-700 dark:bg-slate-900/80">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-              Reader streak
-            </p>
-            <h3 className="mt-3 text-3xl font-bold text-slate-900 dark:text-slate-100">
-              {readerStreak} day{readerStreak === 1 ? "" : "s"}
-            </h3>
-          </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-[#f8efc1] text-amber-700 shadow-sm dark:bg-amber-900 dark:text-amber-100">
-            <Sparkles size={24} />
-          </div>
-        </div>
-        <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-          Consecutive days readers viewed your posts.
-        </p>
+        </article>
       </div>
-    </div>
+    </section>
   );
 };
 
